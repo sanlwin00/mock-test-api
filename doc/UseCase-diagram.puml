@@ -1,0 +1,40 @@
+@startuml
+skinparam actorStyle awesome
+!define RECTANGLE class
+!define ACTOR actor
+!define USECASE usecase
+
+ACTOR User
+
+Package MockTest {
+    USECASE "View Mock Tests" as UC1
+    USECASE "Take Mock Test" as UC2
+    USECASE "Select Mock Test Mode" as UC3
+    USECASE "View Test History" as UC9
+}
+Package UserManagement {
+    USECASE "Register" as UC4
+    USECASE "Login" as UC5
+    USECASE "Logout" as UC6
+    USECASE "Edit Profile" as UC7
+    USECASE "Terminate Subscription" as UC8
+}
+
+Package Payment {
+    USECASE "Subscribe" as UC10
+    USECASE "Make Payment" as UC11
+}
+
+User -up-> UC1
+User -up-> UC2
+UC2 ..> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+User -up-> UC9
+User -right-> UC10
+UC10 --> UC11
+UC4 .left.> UC10
+@enduml

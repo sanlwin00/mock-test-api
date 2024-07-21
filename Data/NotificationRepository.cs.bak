@@ -1,0 +1,6 @@
+namespace MockTestApi.Data
+{
+    public interface INotificationRepository : IRepository<Notification>
+    {
+    }
+}

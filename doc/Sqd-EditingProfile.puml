@@ -1,0 +1,13 @@
+@startuml
+actor User
+participant "Profile Page" as Profile
+participant "User Service" as UserService
+
+User -> Profile : Navigate to Profile Page
+Profile -> UserService : Retrieve User Details
+UserService -> Profile : Return User Details
+User -> Profile : Edit Profile Information
+Profile -> UserService : Submit Changes
+UserService -> Profile : Save Changes
+Profile -> User : Confirmation of Updates
+@enduml

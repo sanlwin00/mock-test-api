@@ -1,0 +1,20 @@
+@startuml
+actor User
+participant "Subscription Page" as Subscription
+participant "User Service" as UserService
+participant "Payment Service" as PaymentService
+participant "Stripe Payment Gateway" as Stripe
+
+User -> Subscription : Navigates to Subscription Page
+Subscription -> UserService : Display Membership Plans
+UserService -> Subscription : Return Membership Plans
+Subscription -> User : Presents Plans
+User -> Subscription : Selects Membership Plan
+Subscription -> Payment : Redirects to Payment Gateway
+Payment -> Stripe : Redirects to Payment Gateway
+Stripe -> Payment : Complete Payment
+Payment -> Subscription : Notify Payment Success
+Subscription -> UserService : Update Membership Status
+UserService -> Subscription : Update User Info
+Subscription -> User : Confirm Subscription
+@enduml

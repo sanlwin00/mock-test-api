@@ -1,0 +1,17 @@
+@startuml
+actor User
+participant "Payment Form" as PaymentForm
+participant "Stripe Payment Gateway" as Stripe
+participant "Payment Service" as PaymentService
+participant "User Service" as UserService
+
+User -> PaymentForm : Selects Make Payment Option
+PaymentForm -> Stripe : Redirection for Payment
+User -> Stripe : Complete Payment Process
+Stripe -> PaymentForm : Notify Success
+PaymentForm -> PaymentService : Notify Success
+PaymentService -> PaymentForm : Update Payment Record
+PaymentForm -> UserService : Activate Membership
+UserService -> PaymentForm : Confirmation
+PaymentForm -> User : Notify Membership Activation
+@enduml

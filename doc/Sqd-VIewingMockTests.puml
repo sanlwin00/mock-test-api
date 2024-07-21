@@ -1,0 +1,10 @@
+@startuml
+actor User
+participant "Home Page" as Home
+participant "Mock Test Service" as MockTestService
+
+User -> Home : Navigates to Home Page
+Home -> MockTestService : Get List of Mock Tests
+MockTestService -> Home : Returns List of Mock Tests
+Home -> User : Displays List of Mock Tests
+@enduml

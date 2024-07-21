@@ -1,0 +1,20 @@
+@startuml
+actor NewUser
+participant "Registration Page" as Register
+participant "User Service" as UserService
+participant "Payment Service" as PaymentService
+participant "Stripe Payment Gateway" as Stripe
+
+NewUser -> Register : Navigates to Registration Page
+Register -> UserService : Enter Registration Information
+UserService -> Register : Validate and Save Info
+Register -> NewUser : Display Membership Options
+NewUser -> Register : Selects PREMIUM Membership
+Register -> Payment : Create Payment Session
+Payment -> Stripe : Redirect to Payment
+Stripe -> Payment : Complete Payment
+Payment -> Register : Payment Success Notification
+Register -> UserService : Create User Account
+UserService -> Register : Return User Details
+Register -> NewUser : Confirmation and Welcome
+@enduml

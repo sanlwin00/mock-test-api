@@ -1,0 +1,18 @@
+@startuml
+actor User
+participant "Home Page" as Home
+participant "Mock Test Service" as MockTestService
+participant "Mock Test History Service" as MockTestHistoryService
+participant "Test Interface" as Test
+
+User -> Home : Selects Mock Test
+Home -> MockTestService : Retrieve Test Details
+MockTestService -> Home : Returns Test Details
+Home -> User : Display Test Mode Options
+User -> Home : Selects Test Mode
+Home -> Test : Start Test in Selected Mode
+User -> Test : Answers Questions
+Test -> MockTestService : Record and Return Results
+MockTestService -> MockTestHistoryService : Save Test History
+Test -> User : Display Test Results
+@enduml

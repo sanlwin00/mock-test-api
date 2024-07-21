@@ -1,0 +1,40 @@
+using MockTestApi.Data.Interfaces;
+using MockTestApi.Models;
+
+namespace MockTestApi.Data
+{
+    public class NotificationRepository : INotificationRepository
+    {
+        private readonly IRepository<Notification> _repository;
+
+        public NotificationRepository(IRepository<Notification> repository)
+        {
+            _repository = repository;
+        }
+
+        public Task<IEnumerable<Notification>> GetAllAsync()
+        {
+            return _repository.GetAllAsync();
+        }
+
+        public Task<Notification> GetByIdAsync(string id)
+        {
+            return _repository.GetByIdAsync(id);
+        }
+
+        public Task CreateAsync(Notification notification)
+        {
+            return _repository.CreateAsync(notification);
+        }
+
+        public Task<bool> UpdateAsync(Notification notification)
+        {
+            return _repository.UpdateAsync(notification);
+        }
+
+        public Task<bool> DeleteAsync(string id)
+        {
+            return _repository.DeleteAsync(id);
+        }
+    }
+}

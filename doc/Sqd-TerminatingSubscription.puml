@@ -1,0 +1,16 @@
+@startuml
+actor User
+participant "Subscription Management" as Subscription
+participant "User Service" as UserService
+participant "Payment Service" as PaymentService
+
+User -> Subscription : Navigate to Subscription Page
+Subscription -> UserService : Retrieve Subscription Details
+UserService -> Subscription : Return Current Subscription Info
+User -> Subscription : Select Terminate Subscription
+Subscription -> UserService : Confirm Action
+UserService -> PaymentService : Process Termination
+PaymentService -> UserService : Confirmation of Termination
+UserService -> Subscription : Update User Profile
+Subscription -> User : Confirmation of Cancellation
+@enduml

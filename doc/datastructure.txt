@@ -1,0 +1,143 @@
+Question
+{
+  "text": "What is the capital of France?",
+  "options": [
+    {"optionText": "Paris", "isCorrect": true, "image": "https://example.com/images/paris.jpg"},
+    {"optionText": "London", "isCorrect": false, "image": "https://example.com/images/london.jpg"},
+    {"optionText": "Berlin", "isCorrect": false, "image": "https://example.com/images/berlin.jpg"},
+    {"optionText": "Madrid", "isCorrect": false, "image": "https://example.com/images/madrid.jpg"}
+  ],
+  "category": "Geography",
+  "tags": ["capital", "Europe"],
+  "explanation": "Paris is the capital city of France.",
+  "reference": {
+    "section": "World Capitals",
+    "pageNumber": 45
+  },
+  "questionImage": "https://example.com/images/capital_city.jpg",
+  "createdAt": "2024-06-01T00:00:00Z",
+  "updatedAt": "2024-06-01T00:00:00Z"
+}
+QuestionSet
+{
+  "_id": "ObjectId",
+  "title": "Basic Geography Set",
+  "description": "A set of basic geography questions.",
+  "questions": [
+    {"questionId": "ObjectId('question_id_1')", "access": "free", // or "paid"},
+    {"questionId": "ObjectId('question_id_2')", "access": "free", // or "paid"},
+    {"questionId": "ObjectId('question_id_3')", "access": "free", // or "paid"}
+  ],
+  "access": "free", // or "paid"
+  "createdBy": "ObjectId('user_id')", // User ID with role "admin"
+  "createdAt": "date",
+  "updatedAt": "date"
+}
+
+User
+{
+  "username": "johndoe",
+  "email": "johndoe@example.com",
+  "passwordHash": "hashedpassword",
+  "role": "user",
+  "profile": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "dob": "1990-01-01",
+    "preferences": {
+      "language": "English",
+      "timezone": "UTC"
+    }
+  },
+  "subscription": {
+    "plan": "free",
+    "startDate": "2024-06-01",
+    "endDate": "2025-06-01"
+  },
+  "createdAt": "2024-06-01T00:00:00Z",
+  "updatedAt": "2024-06-01T00:00:00Z"
+}
+Payment
+{
+  "_id": "ObjectId",
+  "userId": "ObjectId('user_id')",
+  "paymentSessionId": "string",
+  "status": "pending", // or "completed", "failed"
+  "amount": "number",
+  "currency": "string",
+  "billingInfo": {
+    "surname": "string",
+    "givenName": "string",
+    "email": "string",
+    "phone": "string",
+    "city": "string",
+    "province": "string"
+  },
+  "createdAt": "date",
+  "updatedAt": "date"
+}
+Notification
+{
+  "_id": "ObjectId",
+  "userId": "ObjectId('user_id')",
+  "type": "email", // or "in-app"
+  "title": "string",
+  "message": "string",
+  "status": "unread", // or "read"
+  "sentAt": "date"
+}
+AuditLog
+{
+  "_id": "ObjectId",
+  "userId": "ObjectId('user_id')", // Optional, depending on the event
+  "action": "string",
+  "details": "string",
+  "timestamp": "date"
+}
+UserSession
+{
+  "_id": "ObjectId",
+  "userId": "ObjectId('user_id')",
+  "sessionId": "string",
+  "ipAddress": "string",
+  "userAgent": "string",
+  "loginTime": "date",
+  "logoutTime": "date"
+}
+MockTest
+{
+  "_id": "ObjectId",
+  "title": "Geography Basics Test",
+  "description": "A test on basic geography questions",
+  "TestId": "ObjectId('question_set_id')",
+  "questions": Question [],
+  "results": {
+    "score": 1,
+    "passed": true,
+  },
+  "userId" : "ObjectId('user_id')"
+  "createdAt": "date",
+  "updatedAt": "date"
+}
+
+MockTestHistory
+{
+  "userId": "ObjectId('user_id')",
+  "history": [
+    {
+      "testId": "ObjectId('test_id_1')",
+      "title": "Geography Basics Test",
+      "score": 1,
+      "passed": true,
+      "takenAt": "date"
+    },
+    {
+      "testId": "ObjectId('test_id_2')",
+      "title": "History Basics Test",
+      "score": 2,
+      "passed": false,
+      "takenAt": "date"
+    }
+  ]
+}
+
