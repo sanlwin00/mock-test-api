@@ -6,8 +6,10 @@ using MockTestApi.Models;
 using MockTestApi.Services;
 using MockTestApi.Data.Interfaces;
 using MockTestApi.Services.Interfaces;
+using MockTestApi.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
+MongoConfig.RegisterConventions();
 builder.Services.Configure<MyDbSettings>(builder.Configuration.GetSection("MongoDB"));
 builder.Services.AddSingleton<IMongoDatabase>(sp =>
 {
@@ -22,8 +24,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
-builder.Services.AddScoped<IQuestionSetRepository, QuestionSetRepository>();
-builder.Services.AddScoped<IQuestionSetService, QuestionSetService>();
+builder.Services.AddScoped<ITestRepository, TestRepository>();
+builder.Services.AddScoped<ITestService, TestService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -62,12 +64,12 @@ app.MapPost("/questions", async (IQuestionService questionService, Question ques
 app.MapPut("/questions/{id}", async (IQuestionService questionService, Question question) => await questionService.UpdateQuestionAsync(question));
 app.MapDelete("/questions/{id}", async (IQuestionService questionService, string id) => await questionService.DeleteQuestionAsync(id));
 
-// QuestionSet endpoints
-app.MapGet("/questionsets", async (IQuestionSetService questionSetService) => await questionSetService.GetAllQuestionSetsAsync());
-app.MapGet("/questionsets/{id}", async (IQuestionSetService questionSetService, string id) => await questionSetService.GetQuestionSetByIdAsync(id));
-app.MapPost("/questionsets", async (IQuestionSetService questionSetService, QuestionSet questionSet) => await questionSetService.CreateQuestionSetAsync(questionSet));
-app.MapPut("/questionsets/{id}", async (IQuestionSetService questionSetService, QuestionSet questionSet) => await questionSetService.UpdateQuestionSetAsync(questionSet));
-app.MapDelete("/questionsets/{id}", async (IQuestionSetService questionSetService, string id) => await questionSetService.DeleteQuestionSetAsync(id));
+// Test endpoints
+app.MapGet("/tests", async (ITestService testService) => await testService.GetAllTestsAsync());
+app.MapGet("/tests/{id}", async (ITestService testService, string id) => await testService.GetTestByIdAsync(id));
+app.MapPost("/tests", async (ITestService testService, Test test) => await testService.CreateTestAsync(test));
+app.MapPut("/tests/{id}", async (ITestService testService, Test test) => await testService.UpdateTestAsync(test));
+app.MapDelete("/tests/{id}", async (ITestService testService, string id) => await testService.DeleteTestAsync(id));
 
 // Payment endpoints
 app.MapGet("/payments", async (IPaymentService paymentService) => await paymentService.GetAllPaymentsAsync());
@@ -127,10 +129,10 @@ void RegisterRepositories(IServiceCollection services)
         var database = sp.GetRequiredService<IMongoDatabase>();
         return new MongoRepository<Question>(database, "questions");
     });
-    services.AddScoped<IRepository<QuestionSet>>(sp =>
+    services.AddScoped<IRepository<Test>>(sp =>
     {
         var database = sp.GetRequiredService<IMongoDatabase>();
-        return new MongoRepository<QuestionSet>(database, "tests");
+        return new MongoRepository<Test>(database, "tests");
     });
     services.AddScoped<IRepository<Payment>>(sp =>
     {
@@ -170,7 +172,7 @@ void SeedData(IServiceProvider services)
 
     SeedCollection(database, "users", DummyData.GetUsers());
     SeedCollection(database, "questions", DummyData.GetQuestions());
-    SeedCollection(database, "tests", DummyData.GetQuestionSets());
+    SeedCollection(database, "tests", DummyData.GetTests());
     SeedCollection(database, "payments", DummyData.GetPayments());
     SeedCollection(database, "notifications", DummyData.GetNotifications());
     SeedCollection(database, "audit_logs", DummyData.GetAuditLogs());

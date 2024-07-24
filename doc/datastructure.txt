@@ -18,7 +18,7 @@ Question
   "createdAt": "2024-06-01T00:00:00Z",
   "updatedAt": "2024-06-01T00:00:00Z"
 }
-QuestionSet
+Test
 {
   "_id": "ObjectId",
   "title": "Basic Geography Set",

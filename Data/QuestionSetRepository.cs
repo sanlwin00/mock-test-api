@@ -3,33 +3,33 @@ using MockTestApi.Models;
 
 namespace MockTestApi.Data
 {
-    public class QuestionSetRepository : IQuestionSetRepository
+    public class TestRepository : ITestRepository
     {
-        private readonly IRepository<QuestionSet> _repository;
+        private readonly IRepository<Test> _repository;
 
-        public QuestionSetRepository(IRepository<QuestionSet> repository)
+        public TestRepository(IRepository<Test> repository)
         {
             _repository = repository;
         }
 
-        public Task<IEnumerable<QuestionSet>> GetAllAsync()
+        public Task<IEnumerable<Test>> GetAllAsync()
         {
             return _repository.GetAllAsync();
         }
 
-        public Task<QuestionSet> GetByIdAsync(string id)
+        public Task<Test> GetByIdAsync(string id)
         {
             return _repository.GetByIdAsync(id);
         }
 
-        public Task CreateAsync(QuestionSet questionSet)
+        public Task CreateAsync(Test test)
         {
-            return _repository.CreateAsync(questionSet);
+            return _repository.CreateAsync(test);
         }
 
-        public Task<bool> UpdateAsync(QuestionSet questionSet)
+        public Task<bool> UpdateAsync(Test test)
         {
-            return _repository.UpdateAsync(questionSet);
+            return _repository.UpdateAsync(test);
         }
 
         public Task<bool> DeleteAsync(string id)

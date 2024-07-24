@@ -16,14 +16,14 @@ namespace MockTestApi.Models
 
     public class Option
     {
-        public string OptionText { get; set; }
+        public string Text { get; set; }
         public bool IsCorrect { get; set; }
         public string Image { get; set; }
     }
 
     public class Reference
     {
-        public string Section { get; set; }
-        public int PageNumber { get; set; }
+        public string Text { get; set; }
+        public string Url { get; set; }
     }
 }

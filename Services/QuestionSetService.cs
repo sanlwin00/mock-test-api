@@ -4,38 +4,38 @@ using MockTestApi.Services.Interfaces;
 
 namespace MockTestApi.Services
 {
-    public class QuestionSetService : IQuestionSetService
+    public class TestService : ITestService
     {
-        private readonly IQuestionSetRepository _questionSetRepository;
+        private readonly ITestRepository _testRepository;
 
-        public QuestionSetService(IQuestionSetRepository questionSetRepository)
+        public TestService(ITestRepository testRepository)
         {
-            _questionSetRepository = questionSetRepository;
+            _testRepository = testRepository;
         }
 
-        public async Task<IEnumerable<QuestionSet>> GetAllQuestionSetsAsync()
+        public async Task<IEnumerable<Test>> GetAllTestsAsync()
         {
-            return await _questionSetRepository.GetAllAsync();
+            return await _testRepository.GetAllAsync();
         }
 
-        public async Task<QuestionSet> GetQuestionSetByIdAsync(string id)
+        public async Task<Test> GetTestByIdAsync(string id)
         {
-            return await _questionSetRepository.GetByIdAsync(id);
+            return await _testRepository.GetByIdAsync(id);
         }
 
-        public async Task CreateQuestionSetAsync(QuestionSet questionSet)
+        public async Task CreateTestAsync(Test test)
         {
-            await _questionSetRepository.CreateAsync(questionSet);
+            await _testRepository.CreateAsync(test);
         }
 
-        public async Task<bool> UpdateQuestionSetAsync(QuestionSet questionSet)
+        public async Task<bool> UpdateTestAsync(Test test)
         {
-            return await _questionSetRepository.UpdateAsync(questionSet);
+            return await _testRepository.UpdateAsync(test);
         }
 
-        public async Task<bool> DeleteQuestionSetAsync(string id)
+        public async Task<bool> DeleteTestAsync(string id)
         {
-            return await _questionSetRepository.DeleteAsync(id);
+            return await _testRepository.DeleteAsync(id);
         }
     }
 }

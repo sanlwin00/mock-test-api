@@ -52,15 +52,15 @@ namespace MockTestApi.Data
                     Text = "What is the capital of France?",
                     Options = new List<Option>
                     {
-                        new Option { OptionText = "Paris", IsCorrect = true, Image = "https://example.com/images/paris.jpg" },
-                        new Option { OptionText = "London", IsCorrect = false, Image = "https://example.com/images/london.jpg" },
-                        new Option { OptionText = "Berlin", IsCorrect = false, Image = "https://example.com/images/berlin.jpg" },
-                        new Option { OptionText = "Madrid", IsCorrect = false, Image = "https://example.com/images/madrid.jpg" }
+                        new Option { Text = "Paris", IsCorrect = true, Image = "https://example.com/images/paris.jpg" },
+                        new Option { Text = "London", IsCorrect = false, Image = "https://example.com/images/london.jpg" },
+                        new Option { Text = "Berlin", IsCorrect = false, Image = "https://example.com/images/berlin.jpg" },
+                        new Option { Text = "Madrid", IsCorrect = false, Image = "https://example.com/images/madrid.jpg" }
                     },
                     Category = "Geography",
                     Tags = new List<string> { "capital", "Europe" },
                     Explanation = "Paris is the capital city of France.",
-                    Reference = new Reference { Section = "World Capitals", PageNumber = 45 },
+                    Reference = new Reference { Text = "World Capitals", Url = "45" },
                     QuestionImage = "https://example.com/images/capital_city.jpg",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
@@ -68,11 +68,11 @@ namespace MockTestApi.Data
             };
         }
 
-        public static List<QuestionSet> GetQuestionSets()
+        public static List<Test> GetTests()
         {
-            return new List<QuestionSet>
+            return new List<Test>
             {
-                new QuestionSet
+                new Test
                 {
                     Id = ObjectId.GenerateNewId().ToString(),
                     Title = "Basic Geography Set",
@@ -86,7 +86,7 @@ namespace MockTestApi.Data
                     Access = "free",
                     CreatedBy = ObjectId.GenerateNewId().ToString(),
                     CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    ModifiedAt = DateTime.UtcNow
                 }
             };
         }
@@ -176,7 +176,7 @@ namespace MockTestApi.Data
                     Id = ObjectId.GenerateNewId().ToString(),
                     Title = "Geography Basics Test",
                     Description = "A test on basic geography questions",
-                    QuestionSetId = ObjectId.GenerateNewId().ToString(),
+                    TestId = ObjectId.GenerateNewId().ToString(),
                     Questions = new List<MockTestQuestion>
                     {
                         new MockTestQuestion { QuestionId = ObjectId.GenerateNewId().ToString(), SelectedOption = "Paris" },

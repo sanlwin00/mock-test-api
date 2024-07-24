@@ -5,7 +5,7 @@ namespace MockTestApi.Models
         public string Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string QuestionSetId { get; set; }
+        public string TestId { get; set; }
         public List<MockTestQuestion> Questions { get; set; }
         public MockTestResults Results { get; set; }
         public DateTime? CreatedAt { get; set; }
