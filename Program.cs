@@ -32,8 +32,6 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
-builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
-builder.Services.AddScoped<IUserSessionService, UserSessionService>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<IMockTestService, MockTestService>();
 builder.Services.AddScoped<IMockTestHistoryRepository, MockTestHistoryRepository>();
@@ -92,13 +90,6 @@ app.MapPost("/auditlogs", async (IAuditLogService auditLogService, AuditLog audi
 app.MapPut("/auditlogs/{id}", async (IAuditLogService auditLogService, AuditLog auditLog) => await auditLogService.UpdateAuditLogAsync(auditLog));
 app.MapDelete("/auditlogs/{id}", async (IAuditLogService auditLogService, string id) => await auditLogService.DeleteAuditLogAsync(id));
 
-// UserSession endpoints
-app.MapGet("/usersessions", async (IUserSessionService userSessionService) => await userSessionService.GetAllUserSessionsAsync());
-app.MapGet("/usersessions/{id}", async (IUserSessionService userSessionService, string id) => await userSessionService.GetUserSessionByIdAsync(id));
-app.MapPost("/usersessions", async (IUserSessionService userSessionService, UserSession userSession) => await userSessionService.CreateUserSessionAsync(userSession));
-app.MapPut("/usersessions/{id}", async (IUserSessionService userSessionService, UserSession userSession) => await userSessionService.UpdateUserSessionAsync(userSession));
-app.MapDelete("/usersessions/{id}", async (IUserSessionService userSessionService, string id) => await userSessionService.DeleteUserSessionAsync(id));
-
 // MockTest endpoints
 app.MapGet("/mocktests", async (IMockTestService mockTestService) => await mockTestService.GetAllMockTestsAsync());
 app.MapGet("/mocktests/{id}", async (IMockTestService mockTestService, string id) => await mockTestService.GetMockTestByIdAsync(id));
@@ -149,11 +140,6 @@ void RegisterRepositories(IServiceCollection services)
         var database = sp.GetRequiredService<IMongoDatabase>();
         return new MongoRepository<AuditLog>(database, "audit_logs");
     });
-    services.AddScoped<IRepository<UserSession>>(sp =>
-    {
-        var database = sp.GetRequiredService<IMongoDatabase>();
-        return new MongoRepository<UserSession>(database, "user_sessions");
-    });
     services.AddScoped<IRepository<MockTest>>(sp =>
     {
         var database = sp.GetRequiredService<IMongoDatabase>();
@@ -176,7 +162,6 @@ void SeedData(IServiceProvider services)
     SeedCollection(database, "payments", DummyData.GetPayments());
     SeedCollection(database, "notifications", DummyData.GetNotifications());
     SeedCollection(database, "audit_logs", DummyData.GetAuditLogs());
-    SeedCollection(database, "user_sessions", DummyData.GetUserSessions());
     SeedCollection(database, "mock_tests", DummyData.GetMockTests());
     SeedCollection(database, "mock_test_histories", DummyData.GetMockTestHistories());
 }

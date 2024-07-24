@@ -1,43 +1,48 @@
 ﻿namespace MockTestApi.Models
 {
-    public class MyDbSettings
-    {
-        public string ConnectionString { get; set; }
-        public string DatabaseName { get; set; }
-    }
-
     public class User : IEntity
     {
-        public string Id { get; set; }
-        public string Username { get; set; }
+        public string Id { get; set; } // _id in MongoDB, renamed to Id for C#
         public string Email { get; set; }
+        public bool EmailVerified { get; set; }
+        public string DisplayName { get; set; }
+        public string PhotoURL { get; set; }
+        public string PhoneNumber { get; set; }
+        public List<ProviderData> ProviderData { get; set; }
+        public CustomClaims CustomClaims { get; set; }
+        public Metadata Metadata { get; set; }
         public string PasswordHash { get; set; }
-        public string Role { get; set; }
-        public Profile Profile { get; set; }
+        public string PasswordSalt { get; set; }
         public Subscription Subscription { get; set; }
-        public DateTime? CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
     }
 
-    public class Profile
+    public class ProviderData
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public DateTime? Dob { get; set; }
-        public Preferences Preferences { get; set; }
+        public string ProviderId { get; set; }
+        public string Uid { get; set; }
+        public string DisplayName { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+        public string PhotoURL { get; set; }
     }
 
-    public class Preferences
+    public class CustomClaims
     {
-        public string Language { get; set; }
-        public string Timezone { get; set; }
+        public bool Admin { get; set; }
+    }
+
+    public class Metadata
+    {
+        public DateTime CreationTime { get; set; }
+        public DateTime LastSignInTime { get; set; }
     }
 
     public class Subscription
     {
         public string Plan { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public string AccessCode { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 
 }

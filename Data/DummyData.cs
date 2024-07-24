@@ -14,33 +14,44 @@ namespace MockTestApi.Data
             {
                 new User
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
-                    Username = "johndoe",
+                    Id = ObjectId.GenerateNewId().ToString(), // Assuming ObjectId is a method to generate new IDs
                     Email = "johndoe@example.com",
+                    EmailVerified = true,
+                    DisplayName = "John Doe",
+                    PhoneNumber = "123456789",
                     PasswordHash = "hashedpassword",
-                    Role = "user",
-                    Profile = new Profile
+                    PasswordSalt = "saltsalt",
+                    Metadata = new Metadata
                     {
-                        FirstName = "John",
-                        LastName = "Doe",
-                        Dob = DateTime.Parse("1990-01-01"),
-                        Preferences = new Preferences
+                        CreationTime = DateTime.UtcNow,
+                        LastSignInTime = DateTime.UtcNow
+                    },
+                    CustomClaims = new CustomClaims
+                    {
+                        Admin = false
+                    },
+                    ProviderData = new List<ProviderData>
+                    {
+                        new ProviderData
                         {
-                            Language = "English",
-                            Timezone = "UTC"
+                            ProviderId = "password",
+                            Uid = "johndoe@example.com",
+                            DisplayName = "John Doe",
+                            Email = "johndoe@example.com",
+                            PhoneNumber = "123456789",
+                            PhotoURL = ""
                         }
                     },
                     Subscription = new Subscription
                     {
                         Plan = "free",
+                        AccessCode = "FREE123",
                         StartDate = DateTime.Parse("2024-06-01"),
                         EndDate = DateTime.Parse("2025-06-01")
-                    },
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    }
                 }
             };
-        }
+                }
 
         public static List<Question> GetQuestions()
         {
@@ -97,26 +108,30 @@ namespace MockTestApi.Data
             {
                 new Payment
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
-                    UserId = ObjectId.GenerateNewId().ToString(),
-                    PaymentSessionId = "session_12345",
-                    Status = "completed",
+                    Id = ObjectId.GenerateNewId().ToString(), // Assuming ObjectId is a method to generate new IDs
+                    PaymentRef = "session_12345",
                     Amount = 9.99m,
                     Currency = "USD",
-                    BillingInfo = new BillingInfo
+                    Status = "completed",
+                    PaymentMethod = "paypal", // Example method, adjust as needed
+                    Customer = ObjectId.GenerateNewId().ToString(), // Link to user ID
+                    Description = "Payment for John Doe",
+                    Created = DateTime.UtcNow,
+                    BillingDetails = new BillingDetails
                     {
-                        Surname = "Doe",
-                        GivenName = "John",
+                        Name = "John Doe",
                         Email = "johndoe@example.com",
                         Phone = "123456789",
-                        City = "New York",
-                        Province = "NY"
-                    },
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                        Address = new Address
+                        {
+                            City = "New York",
+                            State = "NY",
+                            Country = "US"
+                        }
+                    }
                 }
             };
-        }
+                }
 
         public static List<Notification> GetNotifications()
         {
@@ -146,23 +161,6 @@ namespace MockTestApi.Data
                     Action = "Login",
                     Details = "User logged in successfully.",
                     Timestamp = DateTime.UtcNow
-                }
-            };
-        }
-
-        public static List<UserSession> GetUserSessions()
-        {
-            return new List<UserSession>
-            {
-                new UserSession
-                {
-                    Id = ObjectId.GenerateNewId().ToString(),
-                    UserId = ObjectId.GenerateNewId().ToString(),
-                    SessionId = "session_12345",
-                    IpAddress = "192.168.0.1",
-                    UserAgent = "Mozilla/5.0",
-                    LoginTime = DateTime.UtcNow,
-                    LogoutTime = DateTime.UtcNow.AddHours(1)
                 }
             };
         }
