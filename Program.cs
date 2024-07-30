@@ -21,6 +21,7 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
 RegisterRepositories(builder.Services);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserStore, MongoUserStore>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
@@ -37,7 +38,20 @@ builder.Services.AddScoped<IMockTestService, MockTestService>();
 builder.Services.AddScoped<IMockTestHistoryRepository, MockTestHistoryRepository>();
 builder.Services.AddScoped<IMockTestHistoryService, MockTestHistoryService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigins",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
+
+app.UseCors("AllowSpecificOrigins");
 
 // Seed data
 /*
@@ -54,6 +68,15 @@ app.MapGet("/users/{id}", async (IUserService userService, string id) => await u
 app.MapPost("/users", async (IUserService userService, User user) => await userService.CreateUserAsync(user));
 app.MapPut("/users/{id}", async (IUserService userService, User user) => await userService.UpdateUserAsync(user));
 app.MapDelete("/users/{id}", async (IUserService userService, string id) => await userService.DeleteUserAsync(id));
+app.MapPost("/login", async (IUserService userService, LoginRequest loginRequest) =>
+{
+    var loginResponse = await userService.AuthenticateAsync(loginRequest);
+
+    if (loginResponse == null)
+        return Results.Unauthorized();
+    else
+        return Results.Ok(new { loginResponse });
+});
 
 // Question endpoints
 app.MapGet("/questions", async (IQuestionService questionService) => await questionService.GetAllQuestionsAsync());
