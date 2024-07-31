@@ -7,8 +7,45 @@ using MockTestApi.Services;
 using MockTestApi.Data.Interfaces;
 using MockTestApi.Services.Interfaces;
 using MockTestApi.Utils;
+using MockTestApi.Mapping;
+using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure JWT 
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+var issuer = jwtSettings["Issuer"];
+var audience = jwtSettings["Audience"];
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+});
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+});
+
+// Configure MongoDB
 MongoConfig.RegisterConventions();
 builder.Services.Configure<MyDbSettings>(builder.Configuration.GetSection("MongoDB"));
 builder.Services.AddSingleton<IMongoDatabase>(sp =>
@@ -17,8 +54,11 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     var client = new MongoClient(settings.ConnectionString);
     return client.GetDatabase(settings.DatabaseName);
 });
-// Register repositories
+
 RegisterRepositories(builder.Services);
+//-------
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserStore, MongoUserStore>();
@@ -49,9 +89,12 @@ builder.Services.AddCors(options =>
         });
 });
 
+
 var app = builder.Build();
 
 app.UseCors("AllowSpecificOrigins");
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Seed data
 /*
@@ -63,20 +106,51 @@ using (var scope = app.Services.CreateScope())
 */
 
 // User endpoints
-app.MapGet("/users", async (IUserService userService) => await userService.GetAllUsersAsync());
-app.MapGet("/users/{id}", async (IUserService userService, string id) => await userService.GetUserByIdAsync(id));
+app.MapGet("/users", async (IUserService userService) => await userService.GetAllUsersAsync()).RequireAuthorization("AdminOnly");
+app.MapGet("/users/{id}", async (IUserService userService, string id) => await userService.GetUserByIdAsync(id)).RequireAuthorization();
 app.MapPost("/users", async (IUserService userService, User user) => await userService.CreateUserAsync(user));
-app.MapPut("/users/{id}", async (IUserService userService, User user) => await userService.UpdateUserAsync(user));
-app.MapDelete("/users/{id}", async (IUserService userService, string id) => await userService.DeleteUserAsync(id));
-app.MapPost("/login", async (IUserService userService, LoginRequest loginRequest) =>
+app.MapPut("/users/{id}", async (IUserService userService, User user) => await userService.UpdateUserAsync(user)).RequireAuthorization();
+app.MapDelete("/users/{id}", async (IUserService userService, string id) => await userService.DeleteUserAsync(id)).RequireAuthorization("AdminOnly");
+
+// Auth endpoints
+app.MapPost("/auth/register", async (IUserService userService, RegisterDto registerDto) =>
+{    
+    var loginResponse = await userService.RegisterUserAsync(registerDto);
+
+    if (loginResponse == null)
+        return Results.Unauthorized();
+    else
+    {
+        return Results.Ok(new { loginResponse.Token, loginResponse.User });
+    }
+});
+app.MapPost("/auth/login", async (IUserService userService, IMapper mapper, LoginRequest loginRequest) =>
 {
     var loginResponse = await userService.AuthenticateAsync(loginRequest);
 
     if (loginResponse == null)
         return Results.Unauthorized();
     else
-        return Results.Ok(new { loginResponse });
+    {
+        return Results.Ok(new { loginResponse.Token, loginResponse.User });
+    }
 });
+app.MapGet("/auth/profile", async (HttpContext httpContext, IUserService userService) => {
+    var userId = httpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+    if (userId == null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var user = await userService.GetUserByIdAsync(userId);
+    if (user == null)
+    {
+        return Results.NotFound();
+    }
+    
+    return Results.Ok(user);
+}).RequireAuthorization();
+
 
 // Question endpoints
 app.MapGet("/questions", async (IQuestionService questionService) => await questionService.GetAllQuestionsAsync());

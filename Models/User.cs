@@ -1,4 +1,6 @@
-﻿namespace MockTestApi.Models
+﻿using System.Text.Json.Serialization;
+
+namespace MockTestApi.Models
 {
     public class User : IEntity
     {
@@ -44,15 +46,25 @@
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
     }
-    public class LoginRequest
+
+    public class UserDto
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public string Id { get; set; }
+        public string Email { get; set; }
+        public bool EmailVerified { get; set; }
+        public string DisplayName { get; set; }
+        public string PhotoURL { get; set; }
+        public string PhoneNumber { get; set; }
+        public List<ProviderData> ProviderData { get; set; }
+        public CustomClaims CustomClaims { get; set; }
+        public Metadata Metadata { get; set; }
+        public Subscription Subscription { get; set; }
     }
 
-    public class LoginResponse
+    public class RegisterDto
     {
-        public string Token { get; set; }
-        public User User { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string DisplayName { get; set; }        
     }
 }

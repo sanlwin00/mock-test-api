@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using AutoMapper;
+using Microsoft.IdentityModel.Tokens;
 using MockTestApi.Data.Interfaces;
 using MockTestApi.Models;
 using MockTestApi.Services.Interfaces;
@@ -14,49 +15,72 @@ namespace MockTestApi.Services
         private readonly IUserRepository _userRepository;
         private readonly IUserStore _userStore;
         private readonly IConfiguration _configuration;
-
-        public UserService(IUserRepository userRepository, IConfiguration configuration, IUserStore userStore)
+        private readonly IMapper _mapper;
+        public UserService(IUserRepository userRepository, IConfiguration configuration, IUserStore userStore, IMapper mapper)
         {
             _userRepository = userRepository;
             _configuration = configuration;
             _userStore = userStore;
+            _mapper = mapper;
         }
         public async Task<LoginResponse> AuthenticateAsync(LoginRequest loginRequest)
         {
             var user = await _userStore.GetByUsernameAsync(loginRequest.Username);
             if (user != null)
-            {
+            {                
                 string passwordHash = this.GetHash(loginRequest.Password + user.PasswordSalt);
                 if (user.PasswordHash == passwordHash)
-                {
-                    // Generate JWT token
-                    var tokenHandler = new JwtSecurityTokenHandler();
-                    var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
-                    var tokenDescriptor = new SecurityTokenDescriptor
-                    {
-                        Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
-                        Expires = DateTime.UtcNow.AddHours(1),
-                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                    };
-                    var token = tokenHandler.CreateToken(tokenDescriptor);
+                {                    
                     var loginReponse = new LoginResponse
                     {
-                        Token = tokenHandler.WriteToken(token),
-                        User = user
+                        Token = GenerateJwtToken(user),
+                        User = _mapper.Map<UserDto>(user)
                     };
                     return loginReponse;
                 }
             }
             return null;
         }
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+
+        public async Task<LoginResponse> RegisterUserAsync(RegisterDto registerDto)
         {
-            return await _userRepository.GetAllAsync();
+            var salt = this.GetSalt();
+            var user = new User
+            {
+                Email = registerDto.Email,
+                DisplayName = registerDto.DisplayName,
+                PasswordSalt = salt,
+                PasswordHash = this.GetHash(registerDto.Password + salt),
+                Subscription = new Subscription { Plan = "free" },
+                Metadata = new Metadata { CreationTime = DateTime.Now },
+                ProviderData = new List<ProviderData>([new ProviderData {
+                    DisplayName = registerDto.DisplayName,
+                    Email = registerDto.Email,
+                    Uid = registerDto.Email,
+                    ProviderId = "password"
+                }])
+            };
+            await _userRepository.CreateAsync(user);
+
+            var loginRequest = new LoginRequest { Username = registerDto.Email, Password = registerDto.Password };
+            
+            return await AuthenticateAsync(loginRequest);
         }
 
-        public async Task<User> GetUserByIdAsync(string id)
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
-            return await _userRepository.GetByIdAsync(id);
+            var users = await _userRepository.GetAllAsync();
+            var userDtos = _mapper.Map<List<UserDto>>(users);
+
+            return userDtos;
+        }
+
+        public async Task<UserDto> GetUserByIdAsync(string id)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            var userDto = _mapper.Map<UserDto>(user);
+
+            return userDto;
         }
 
         public async Task<bool> UpdateUserAsync(User user)
@@ -74,7 +98,7 @@ namespace MockTestApi.Services
             await _userRepository.CreateAsync(user);
         }
 
-        public string GetHash(string text)
+        private string GetHash(string text)
         {
             // SHA512 is disposable by inheritance.  
             using (var sha256 = SHA256.Create())
@@ -86,7 +110,7 @@ namespace MockTestApi.Services
             }
         }
 
-        public string GetSalt()
+        private string GetSalt()
         {
             byte[] bytes = new byte[128 / 8];
             using (var keyGenerator = RandomNumberGenerator.Create())
@@ -95,6 +119,40 @@ namespace MockTestApi.Services
                 return BitConverter.ToString(bytes).Replace("-", "").ToLower();
             }
         }
+
+        private string GenerateJwtToken(User user)
+        {
+            // Define standard claims
+            var claims = new List<Claim>
+            {
+                new Claim("id", user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            // Conditionally add the "Admin" role claim if the user is an admin
+            if (user.CustomClaims?.Admin == true)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            }
+
+            // Create the token with a signing key
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.Now.AddDays(Convert.ToDouble(_configuration["Jwt:ExpireDays"]));
+
+            var token = new JwtSecurityToken(
+                _configuration["Jwt:Issuer"],
+                _configuration["Jwt:Audience"],
+                claims,
+                expires: expires,
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
     }
 
 }
