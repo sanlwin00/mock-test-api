@@ -30,7 +30,17 @@ namespace MockTestApi.Services
             {                
                 string passwordHash = this.GetHash(loginRequest.Password + user.PasswordSalt);
                 if (user.PasswordHash == passwordHash)
-                {                    
+                {
+                    // Check subscription plan
+                    if (user.Subscription.Plan != "free")
+                    {
+                        // Check if the subscription end date is in the future
+                        if (user.Subscription.EndDate < DateTime.UtcNow)
+                        {
+                            throw new UnauthorizedAccessException("Membership expired.");
+                        }
+                    }
+
                     var loginReponse = new LoginResponse
                     {
                         Token = GenerateJwtToken(user),
@@ -38,6 +48,31 @@ namespace MockTestApi.Services
                     };
                     return loginReponse;
                 }
+            }
+            return null;
+        }
+
+        public async Task<LoginResponse> AuthenticateWithAccessCodeAsync(string accessCode)
+        {
+            var user = await _userStore.GetByAccessCodeAsync(accessCode);
+            if (user != null)
+            {
+                // Check subscription plan
+                if (user.Subscription.Plan != "free")
+                {
+                    // Check if the subscription end date is in the future
+                    if (user.Subscription.EndDate < DateTime.UtcNow)
+                    {
+                        throw new UnauthorizedAccessException("Membership expired.");
+                    }
+                }
+
+                var loginResponse = new LoginResponse
+                {
+                    Token = GenerateJwtToken(user),
+                    User = _mapper.Map<UserDto>(user)
+                };
+                return loginResponse;
             }
             return null;
         }

@@ -17,4 +17,9 @@ namespace MockTestApi.Models
         [JsonPropertyName("user")]
         public UserDto User { get; set; }
     }
+    public class AccessCodeRequest
+    {
+        [JsonPropertyName("accessCode")]
+        public string AccessCode { get; set; }
+    }
 }

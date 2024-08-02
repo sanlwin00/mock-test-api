@@ -47,6 +47,12 @@ namespace MockTestApi.Models
         public DateTime EndDate { get; set; }
     }
 
+    public class SubscriptionDto
+    {
+        public string Plan { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+    }
     public class UserDto
     {
         public string Id { get; set; }
@@ -58,7 +64,7 @@ namespace MockTestApi.Models
         public List<ProviderData> ProviderData { get; set; }
         public CustomClaims CustomClaims { get; set; }
         public Metadata Metadata { get; set; }
-        public Subscription Subscription { get; set; }
+        public SubscriptionDto Subscription { get; set; }
     }
 
     public class RegisterDto

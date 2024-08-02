@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -114,25 +115,70 @@ app.MapDelete("/users/{id}", async (IUserService userService, string id) => awai
 
 // Auth endpoints
 app.MapPost("/auth/register", async (IUserService userService, RegisterDto registerDto) =>
-{    
-    var loginResponse = await userService.RegisterUserAsync(registerDto);
-
-    if (loginResponse == null)
-        return Results.Unauthorized();
-    else
+{
+    try
     {
-        return Results.Ok(new { loginResponse.Token, loginResponse.User });
+        var loginResponse = await userService.RegisterUserAsync(registerDto);
+
+        if (loginResponse == null)
+            return Results.Unauthorized();
+        else
+        {
+            return Results.Ok(new { loginResponse.Token, loginResponse.User });
+        }
+    }
+    catch (Exception ex)
+    {
+        var response = new { message = ex.Message };
+        return Results.Json(response, statusCode: 500);
     }
 });
 app.MapPost("/auth/login", async (IUserService userService, IMapper mapper, LoginRequest loginRequest) =>
 {
-    var loginResponse = await userService.AuthenticateAsync(loginRequest);
-
-    if (loginResponse == null)
-        return Results.Unauthorized();
-    else
+    try
     {
-        return Results.Ok(new { loginResponse.Token, loginResponse.User });
+        var loginResponse = await userService.AuthenticateAsync(loginRequest);
+
+        if (loginResponse == null)
+            return Results.Unauthorized();
+        else
+        {
+            return Results.Ok(new { loginResponse.Token, loginResponse.User });
+        }
+    }
+    catch (UnauthorizedAccessException ex)
+    {
+        var response = new { message = ex.Message };
+        return Results.Json(response, statusCode: 401);
+    }
+    catch (Exception ex)
+    {
+        var response = new { message = ex.Message };
+        return Results.Json(response, statusCode: 500);
+    }
+});
+app.MapPost("/auth/login/accesscode", async (IUserService userService, IMapper mapper, AccessCodeRequest accessCodeRequest) =>
+{
+    try
+    {
+        var loginResponse = await userService.AuthenticateWithAccessCodeAsync(accessCodeRequest.AccessCode);
+
+        if (loginResponse == null)
+            throw new UnauthorizedAccessException("Invalid Access Code.");
+        else
+        {
+            return Results.Ok(new { loginResponse.Token, loginResponse.User });
+        }
+    }
+    catch (UnauthorizedAccessException ex)
+    {
+        var response = new { message = ex.Message };
+        return Results.Json(response, statusCode: 401);
+    }
+    catch (Exception ex)
+    {
+        var response = new { message = ex.Message };
+        return Results.Json(response, statusCode: 500);
     }
 });
 app.MapGet("/auth/profile", async (HttpContext httpContext, IUserService userService) => {

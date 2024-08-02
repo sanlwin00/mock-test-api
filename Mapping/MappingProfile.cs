@@ -8,6 +8,8 @@ namespace MockTestApi.Mapping
         public MappingProfile()
         {
             CreateMap<User, UserDto>();
+            CreateMap<Subscription, SubscriptionDto>();
+
         }
     }
 }

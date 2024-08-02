@@ -13,6 +13,11 @@ namespace MockTestApi.Data
             _collection = database.GetCollection<User>("users");
         }
 
+        public Task<User> GetByAccessCodeAsync(string accessCode)
+        {
+            return _collection.Find(user => user.Subscription.AccessCode == accessCode).FirstOrDefaultAsync();
+        }
+
         public Task<User> GetByUsernameAsync(string username)
         {
             return _collection.Find(user => user.Email == username).FirstOrDefaultAsync();
