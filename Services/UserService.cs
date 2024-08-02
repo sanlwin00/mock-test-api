@@ -30,13 +30,25 @@ namespace MockTestApi.Services
             {                
                 string passwordHash = this.GetHash(loginRequest.Password + user.PasswordSalt);
                 if (user.PasswordHash == passwordHash)
-                {   
-                    var loginReponse = new LoginResponse
+                {
+                    UserDto userDto = _mapper.Map<UserDto>(user);
+
+                    // Check subscription plan
+                    if (user.Subscription.Plan != "free")
+                    {
+                        // Check if the subscription end date is in the future
+                        if (user.Subscription.EndDate < DateTime.UtcNow)
+                        {
+                            userDto.Subscription.IsExpired = true;
+                        }
+                    }
+
+                    var loginResponse = new LoginResponse
                     {
                         Token = GenerateJwtToken(user),
-                        User = _mapper.Map<UserDto>(user)
+                        User = userDto
                     };
-                    return loginReponse;
+                    return loginResponse;
                 }
             }
             return null;
@@ -46,11 +58,23 @@ namespace MockTestApi.Services
         {
             var user = await _userStore.GetByAccessCodeAsync(accessCode);
             if (user != null)
-            {                
+            {
+                UserDto userDto = _mapper.Map<UserDto>(user);
+
+                // Check subscription plan
+                if (user.Subscription.Plan != "free")
+                {
+                    // Check if the subscription end date is in the future
+                    if (user.Subscription.EndDate < DateTime.UtcNow)
+                    {
+                        userDto.Subscription.IsExpired = true;
+                    }
+                }
+
                 var loginResponse = new LoginResponse
                 {
                     Token = GenerateJwtToken(user),
-                    User = _mapper.Map<UserDto>(user)
+                    User = userDto
                 };
                 return loginResponse;
             }
