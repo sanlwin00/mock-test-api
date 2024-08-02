@@ -30,17 +30,7 @@ namespace MockTestApi.Services
             {                
                 string passwordHash = this.GetHash(loginRequest.Password + user.PasswordSalt);
                 if (user.PasswordHash == passwordHash)
-                {
-                    // Check subscription plan
-                    if (user.Subscription.Plan != "free")
-                    {
-                        // Check if the subscription end date is in the future
-                        if (user.Subscription.EndDate < DateTime.UtcNow)
-                        {
-                            throw new UnauthorizedAccessException("Membership expired.");
-                        }
-                    }
-
+                {   
                     var loginReponse = new LoginResponse
                     {
                         Token = GenerateJwtToken(user),
@@ -56,17 +46,7 @@ namespace MockTestApi.Services
         {
             var user = await _userStore.GetByAccessCodeAsync(accessCode);
             if (user != null)
-            {
-                // Check subscription plan
-                if (user.Subscription.Plan != "free")
-                {
-                    // Check if the subscription end date is in the future
-                    if (user.Subscription.EndDate < DateTime.UtcNow)
-                    {
-                        throw new UnauthorizedAccessException("Membership expired.");
-                    }
-                }
-
+            {                
                 var loginResponse = new LoginResponse
                 {
                     Token = GenerateJwtToken(user),
@@ -79,6 +59,13 @@ namespace MockTestApi.Services
 
         public async Task<LoginResponse> RegisterUserAsync(RegisterRequest registerDto)
         {
+            // Check if the email already exists
+            var existingUser = await _userStore.GetByUsernameAsync(registerDto.Email);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("Email already exists. Please sign in.");
+            }
+
             var salt = this.GetSalt();
             var user = new User
             {
