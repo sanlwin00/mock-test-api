@@ -1,5 +1,6 @@
 ﻿using MockTestApi.Data.Interfaces;
 using MockTestApi.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace MockTestApi.Data
@@ -28,6 +29,12 @@ namespace MockTestApi.Data
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
+            }
+
+            // Initialize Id if it's null or empty
+            if (string.IsNullOrEmpty(entity.Id))
+            {
+                entity.Id = ObjectId.GenerateNewId().ToString();
             }
             await _collection.InsertOneAsync(entity);
         }

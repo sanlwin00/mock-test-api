@@ -114,7 +114,7 @@ app.MapPut("/users/{id}", async (IUserService userService, User user) => await u
 app.MapDelete("/users/{id}", async (IUserService userService, string id) => await userService.DeleteUserAsync(id)).RequireAuthorization("AdminOnly");
 
 // Auth endpoints
-app.MapPost("/auth/register", async (IUserService userService, RegisterDto registerDto) =>
+app.MapPost("/auth/register", async (IUserService userService, RegisterRequest registerDto) =>
 {
     try
     {

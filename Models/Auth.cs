@@ -22,4 +22,16 @@ namespace MockTestApi.Models
         [JsonPropertyName("accessCode")]
         public string AccessCode { get; set; }
     }
+
+    public class RegisterRequest
+    {
+        [JsonPropertyName("email")]
+        public string Email { get; set; }
+
+        [JsonPropertyName("password")]
+        public string Password { get; set; }
+
+        [JsonPropertyName("displayName")]
+        public string DisplayName { get; set; }
+    }
 }

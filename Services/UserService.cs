@@ -77,7 +77,7 @@ namespace MockTestApi.Services
             return null;
         }
 
-        public async Task<LoginResponse> RegisterUserAsync(RegisterDto registerDto)
+        public async Task<LoginResponse> RegisterUserAsync(RegisterRequest registerDto)
         {
             var salt = this.GetSalt();
             var user = new User
