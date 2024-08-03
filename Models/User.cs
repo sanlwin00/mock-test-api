@@ -76,4 +76,11 @@ namespace MockTestApi.Models
         public SubscriptionDto Subscription { get; set; }
     }
 
+    public class UpdateUserDto
+    {
+        public string DisplayName { get; set; }
+        public string PhoneNumber { get; set; }
+    }
+
+
 }

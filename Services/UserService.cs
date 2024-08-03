@@ -114,6 +114,28 @@ namespace MockTestApi.Services
             return await _userRepository.UpdateAsync(user);
         }
 
+        public async Task<bool> UpdateUserAsync(string id, UpdateUserDto updateUserDto)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null)
+            {
+                return false;
+            }
+
+            // Update only the fields that are not null
+            if (!string.IsNullOrEmpty(updateUserDto.DisplayName))
+            {
+                user.DisplayName = updateUserDto.DisplayName;
+            }
+
+            if (!string.IsNullOrEmpty(updateUserDto.PhoneNumber))
+            {
+                user.PhoneNumber = updateUserDto.PhoneNumber;
+            }
+
+            return await _userRepository.UpdateAsync(user);
+        }
+
         public async Task<bool> DeleteUserAsync(string id)
         {
             return await _userRepository.DeleteAsync(id);

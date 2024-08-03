@@ -8,6 +8,7 @@ namespace MockTestApi.Services.Interfaces
         Task<UserDto> GetUserByIdAsync(string id);
         Task CreateUserAsync(User user);
         Task<bool> UpdateUserAsync(User user);
+        Task<bool> UpdateUserAsync(string id, UpdateUserDto updateUserDto);
         Task<bool> DeleteUserAsync(string id);
         Task<LoginResponse> AuthenticateAsync(LoginRequest loginRequest);
         Task<LoginResponse> AuthenticateWithAccessCodeAsync(string accessCode);

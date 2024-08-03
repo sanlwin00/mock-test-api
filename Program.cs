@@ -112,6 +112,23 @@ app.MapGet("/users/{id}", async (IUserService userService, string id) => await u
 app.MapPost("/users", async (IUserService userService, User user) => await userService.CreateUserAsync(user));
 app.MapPut("/users/{id}", async (IUserService userService, User user) => await userService.UpdateUserAsync(user)).RequireAuthorization();
 app.MapDelete("/users/{id}", async (IUserService userService, string id) => await userService.DeleteUserAsync(id)).RequireAuthorization("AdminOnly");
+app.MapPatch("/users/{id}", async (IUserService userService, UpdateUserDto updateUserDto, string id) =>
+{
+    try
+    {
+        var success = await userService.UpdateUserAsync(id, updateUserDto);
+        if (success)
+        {
+            return Results.NoContent();
+        }
+        return Results.NotFound();
+    }
+    catch (Exception ex)
+    {
+        var response = new { message = ex.Message };
+        return Results.Json(response, statusCode: 500);
+    }
+}).RequireAuthorization();
 
 // Auth endpoints
 app.MapPost("/auth/register", async (IUserService userService, RegisterRequest registerDto) =>
