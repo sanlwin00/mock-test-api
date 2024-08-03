@@ -35,5 +35,13 @@ namespace MockTestApi.Models
         public string DisplayName { get; set; }
     }
 
+    public class UpdateUserDto
+    {
+        [JsonPropertyName("displayName")]
+        public string DisplayName { get; set; }
+
+        [JsonPropertyName("phoneNumber")]
+        public string PhoneNumber { get; set; }
+    }
 
 }

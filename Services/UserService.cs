@@ -128,7 +128,7 @@ namespace MockTestApi.Services
                 user.DisplayName = updateUserDto.DisplayName;
             }
 
-            if (!string.IsNullOrEmpty(updateUserDto.PhoneNumber))
+            if (updateUserDto.PhoneNumber != null)
             {
                 user.PhoneNumber = updateUserDto.PhoneNumber;
             }
