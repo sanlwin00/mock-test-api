@@ -50,10 +50,18 @@ namespace MockTestApi.Models
     public class SubscriptionDto
     {
         public string Plan { get; set; }
-        public bool IsExpired { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public bool IsExpired
+        {
+            get
+            {
+                // Check if the plan is not free and if the end date is in the past
+                return Plan != "free" && EndDate < DateTime.UtcNow;
+            }
+        }
     }
+
     public class UserDto
     {
         public string Id { get; set; }

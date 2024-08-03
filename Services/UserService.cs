@@ -33,16 +33,6 @@ namespace MockTestApi.Services
                 {
                     UserDto userDto = _mapper.Map<UserDto>(user);
 
-                    // Check subscription plan
-                    if (user.Subscription.Plan != "free")
-                    {
-                        // Check if the subscription end date is in the future
-                        if (user.Subscription.EndDate < DateTime.UtcNow)
-                        {
-                            userDto.Subscription.IsExpired = true;
-                        }
-                    }
-
                     var loginResponse = new LoginResponse
                     {
                         Token = GenerateJwtToken(user),
@@ -60,16 +50,6 @@ namespace MockTestApi.Services
             if (user != null)
             {
                 UserDto userDto = _mapper.Map<UserDto>(user);
-
-                // Check subscription plan
-                if (user.Subscription.Plan != "free")
-                {
-                    // Check if the subscription end date is in the future
-                    if (user.Subscription.EndDate < DateTime.UtcNow)
-                    {
-                        userDto.Subscription.IsExpired = true;
-                    }
-                }
 
                 var loginResponse = new LoginResponse
                 {
@@ -125,7 +105,7 @@ namespace MockTestApi.Services
         {
             var user = await _userRepository.GetByIdAsync(id);
             var userDto = _mapper.Map<UserDto>(user);
-
+            
             return userDto;
         }
 
