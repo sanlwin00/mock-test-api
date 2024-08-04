@@ -13,15 +13,22 @@ namespace MockTestApi.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IPasswordResetTokenRepository _passwordResetRepository;
         private readonly IUserStore _userStore;
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
-        public UserService(IUserRepository userRepository, IConfiguration configuration, IUserStore userStore, IMapper mapper)
+        private readonly IEmailService _emailService;
+        public UserService(IUserRepository userRepository, IConfiguration configuration, 
+            IUserStore userStore, IMapper mapper, 
+            IPasswordResetTokenRepository passwordResetTokenRepository,
+            IEmailService emailService)
         {
             _userRepository = userRepository;
             _configuration = configuration;
             _userStore = userStore;
             _mapper = mapper;
+            _passwordResetRepository = passwordResetTokenRepository;
+            _emailService = emailService;
         }
         public async Task<LoginResponse> AuthenticateAsync(LoginRequest loginRequest)
         {
@@ -75,10 +82,11 @@ namespace MockTestApi.Services
             {
                 Email = registerDto.Email,
                 DisplayName = registerDto.DisplayName,
+                TimeZone = registerDto.TimeZone,
                 PasswordSalt = salt,
                 PasswordHash = this.GetHash(registerDto.Password + salt),
                 Subscription = new Subscription { Plan = "free" },
-                Metadata = new Metadata { CreationTime = DateTime.Now },
+                Metadata = new Metadata { CreationTime = DateTime.UtcNow },
                 ProviderData = new List<ProviderData>([new ProviderData {
                     DisplayName = registerDto.DisplayName,
                     Email = registerDto.Email,
@@ -127,10 +135,13 @@ namespace MockTestApi.Services
             {
                 user.DisplayName = updateUserDto.DisplayName;
             }
-
             if (updateUserDto.PhoneNumber != null)
             {
                 user.PhoneNumber = updateUserDto.PhoneNumber;
+            }
+            if (updateUserDto.TimeZone != null)
+            {
+                user.TimeZone = updateUserDto.TimeZone;
             }
 
             return await _userRepository.UpdateAsync(user);
@@ -145,6 +156,61 @@ namespace MockTestApi.Services
         {
             await _userRepository.CreateAsync(user);
         }
+
+        public async Task<bool> RequestPasswordResetAsync(string email)
+        {
+            var user = await _userStore.GetByUsernameAsync(email);
+            if (user == null)
+            {
+                return false; // User not found
+            }
+
+            var token = Guid.NewGuid().ToString();
+            var expiryDate = DateTime.UtcNow.AddHours(24);
+
+            // Save the reset token in the database
+            var resetToken = new PasswordResetToken
+            {
+                Id = token,
+                ExpiryDate = expiryDate,
+                UserId = user.Id
+            };
+
+            await _passwordResetRepository.CreateAsync(resetToken);
+
+            var resetLink = $"https://yourdomain.com/reset-password?token={token}";
+
+            // Send the email (implement the IEmailSender interface)
+            await _emailService.SendEmailAsync(user.Email, "Password Reset", $"Please reset your password by clicking <a href='{resetLink}'>here</a>.");
+
+            return true;
+        }
+
+        public async Task<bool> ResetPasswordAsync(string token, string newPassword)
+        {
+            var resetToken = await _passwordResetRepository.GetByIdAsync(token);
+            if (resetToken == null || resetToken.ExpiryDate < DateTime.UtcNow)
+            {
+                return false; // Invalid or expired token
+            }
+
+            var user = await _userRepository.GetByIdAsync(resetToken.UserId);
+            if (user == null)
+            {
+                return false; // User not found
+            }
+
+            // Hash the new password and update
+            var salt = GetSalt();
+            user.PasswordSalt = salt;
+            user.PasswordHash = GetHash(newPassword + salt);
+
+            await _userRepository.UpdateAsync(user);
+            await _passwordResetRepository.DeleteAsync(token);
+
+            return true;
+        }
+
 
         private string GetHash(string text)
         {
@@ -188,7 +254,7 @@ namespace MockTestApi.Services
             // Create the token with a signing key
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddDays(Convert.ToDouble(_configuration["Jwt:ExpireDays"]));
+            var expires = DateTime.UtcNow.AddDays(Convert.ToDouble(_configuration["Jwt:ExpireDays"]));
 
             var token = new JwtSecurityToken(
                 _configuration["Jwt:Issuer"],

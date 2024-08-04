@@ -16,6 +16,7 @@ namespace MockTestApi.Models
         public string PasswordHash { get; set; }
         public string PasswordSalt { get; set; }
         public Subscription Subscription { get; set; }
+        public string? TimeZone { get; set; }
     }
 
     public class ProviderData
@@ -74,8 +75,7 @@ namespace MockTestApi.Models
         public CustomClaims CustomClaims { get; set; }
         public Metadata Metadata { get; set; }
         public SubscriptionDto Subscription { get; set; }
+        public string? TimeZone { get; set; }
     }
-
-    
 
 }

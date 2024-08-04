@@ -33,6 +33,9 @@ namespace MockTestApi.Models
 
         [JsonPropertyName("displayName")]
         public string DisplayName { get; set; }
+
+        [JsonPropertyName("timeZone")]
+        public string? TimeZone { get; set; }
     }
 
     public class UpdateUserDto
@@ -41,7 +44,18 @@ namespace MockTestApi.Models
         public string DisplayName { get; set; }
 
         [JsonPropertyName("phoneNumber")]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
+
+        [JsonPropertyName("timeZone")]
+        public string? TimeZone { get; set; }
+
     }
 
+    public class PasswordResetDto
+    {
+        [JsonPropertyName("token")]
+        public string Token { get; set; }
+        [JsonPropertyName("password")]
+        public string Password { get; set; }
+    }
 }

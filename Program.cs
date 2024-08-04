@@ -17,6 +17,9 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Bind Smtp settings from configuration
+builder.Services.Configure<SmtpSetting>(builder.Configuration.GetSection("Smtp"));
+
 // Configure JWT 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
@@ -61,6 +64,7 @@ RegisterRepositories(builder.Services);
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
+builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserStore, MongoUserStore>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -78,6 +82,7 @@ builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<IMockTestService, MockTestService>();
 builder.Services.AddScoped<IMockTestHistoryRepository, MockTestHistoryRepository>();
 builder.Services.AddScoped<IMockTestHistoryService, MockTestHistoryService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddCors(options =>
 {
@@ -107,11 +112,11 @@ using (var scope = app.Services.CreateScope())
 */
 
 // User endpoints
-app.MapGet("/users", async (IUserService userService) => await userService.GetAllUsersAsync()).RequireAuthorization("AdminOnly");
-app.MapGet("/users/{id}", async (IUserService userService, string id) => await userService.GetUserByIdAsync(id)).RequireAuthorization();
-app.MapPost("/users", async (IUserService userService, User user) => await userService.CreateUserAsync(user));
-app.MapPut("/users/{id}", async (IUserService userService, User user) => await userService.UpdateUserAsync(user)).RequireAuthorization();
-app.MapDelete("/users/{id}", async (IUserService userService, string id) => await userService.DeleteUserAsync(id)).RequireAuthorization("AdminOnly");
+//app.MapGet("/users", async (IUserService userService) => await userService.GetAllUsersAsync()).RequireAuthorization("AdminOnly");
+//app.MapGet("/users/{id}", async (IUserService userService, string id) => await userService.GetUserByIdAsync(id)).RequireAuthorization();
+//app.MapPost("/users", async (IUserService userService, User user) => await userService.CreateUserAsync(user));
+//app.MapPut("/users/{id}", async (IUserService userService, User user) => await userService.UpdateUserAsync(user)).RequireAuthorization();
+//app.MapDelete("/users/{id}", async (IUserService userService, string id) => await userService.DeleteUserAsync(id)).RequireAuthorization("AdminOnly");
 app.MapPatch("/users/{id}", async (IUserService userService, UpdateUserDto updateUserDto, string id) =>
 {
     try
@@ -214,20 +219,41 @@ app.MapGet("/auth/profile", async (HttpContext httpContext, IUserService userSer
     return Results.Ok(user);
 }).RequireAuthorization();
 
+app.MapPost("/api/auth/request-password-reset", async (string email, IUserService userService) =>
+{
+    var success = await userService.RequestPasswordResetAsync(email);
+    if (success)
+    {
+        return Results.Ok("Password reset email sent");
+    }
+    return Results.NotFound("User not found");
+});
+
+app.MapPost("/api/auth/reset-password", async (PasswordResetDto passwordResetDto, IUserService userService) =>
+{
+    var success = await userService.ResetPasswordAsync(passwordResetDto.Token, passwordResetDto.Token);
+    if (success)
+    {
+        return Results.Ok("Password has been reset");
+    }
+    return Results.BadRequest("Invalid or expired token");
+});
+
+
 
 // Question endpoints
 app.MapGet("/questions", async (IQuestionService questionService) => await questionService.GetAllQuestionsAsync());
-app.MapGet("/questions/{id}", async (IQuestionService questionService, string id) => await questionService.GetQuestionByIdAsync(id));
-app.MapPost("/questions", async (IQuestionService questionService, Question question) => await questionService.CreateQuestionAsync(question));
-app.MapPut("/questions/{id}", async (IQuestionService questionService, Question question) => await questionService.UpdateQuestionAsync(question));
-app.MapDelete("/questions/{id}", async (IQuestionService questionService, string id) => await questionService.DeleteQuestionAsync(id));
+//app.MapGet("/questions/{id}", async (IQuestionService questionService, string id) => await questionService.GetQuestionByIdAsync(id));
+//app.MapPost("/questions", async (IQuestionService questionService, Question question) => await questionService.CreateQuestionAsync(question));
+//app.MapPut("/questions/{id}", async (IQuestionService questionService, Question question) => await questionService.UpdateQuestionAsync(question));
+//app.MapDelete("/questions/{id}", async (IQuestionService questionService, string id) => await questionService.DeleteQuestionAsync(id));
 
 // Test endpoints
 app.MapGet("/tests", async (ITestService testService) => await testService.GetAllTestsAsync());
-app.MapGet("/tests/{id}", async (ITestService testService, string id) => await testService.GetTestByIdAsync(id));
-app.MapPost("/tests", async (ITestService testService, Test test) => await testService.CreateTestAsync(test));
-app.MapPut("/tests/{id}", async (ITestService testService, Test test) => await testService.UpdateTestAsync(test));
-app.MapDelete("/tests/{id}", async (ITestService testService, string id) => await testService.DeleteTestAsync(id));
+//app.MapGet("/tests/{id}", async (ITestService testService, string id) => await testService.GetTestByIdAsync(id));
+//app.MapPost("/tests", async (ITestService testService, Test test) => await testService.CreateTestAsync(test));
+//app.MapPut("/tests/{id}", async (ITestService testService, Test test) => await testService.UpdateTestAsync(test));
+//app.MapDelete("/tests/{id}", async (ITestService testService, string id) => await testService.DeleteTestAsync(id));
 
 // Payment endpoints
 app.MapGet("/payments", async (IPaymentService paymentService) => await paymentService.GetAllPaymentsAsync());
@@ -309,6 +335,11 @@ void RegisterRepositories(IServiceCollection services)
     {
         var database = sp.GetRequiredService<IMongoDatabase>();
         return new MongoRepository<MockTestHistory>(database, "mock_test_histories");
+    });
+    services.AddScoped<IRepository<PasswordResetToken>>(sp =>
+    {
+        var database = sp.GetRequiredService<IMongoDatabase>();
+        return new MongoRepository<PasswordResetToken>(database, "password_reset_token");
     });
 }
 
