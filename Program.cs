@@ -219,9 +219,9 @@ app.MapGet("/auth/profile", async (HttpContext httpContext, IUserService userSer
     return Results.Ok(user);
 }).RequireAuthorization();
 
-app.MapPost("/api/auth/request-password-reset", async (string email, IUserService userService) =>
+app.MapPost("/auth/request-password-reset", async (PasswordResetRequest passwordResetRequest, IUserService userService) =>
 {
-    var success = await userService.RequestPasswordResetAsync(email);
+    var success = await userService.RequestPasswordResetAsync(passwordResetRequest.Email);
     if (success)
     {
         return Results.Ok("Password reset email sent");
@@ -229,9 +229,9 @@ app.MapPost("/api/auth/request-password-reset", async (string email, IUserServic
     return Results.NotFound("User not found");
 });
 
-app.MapPost("/api/auth/reset-password", async (PasswordResetDto passwordResetDto, IUserService userService) =>
+app.MapPost("/auth/reset-password", async (PasswordResetDto passwordResetDto, IUserService userService) =>
 {
-    var success = await userService.ResetPasswordAsync(passwordResetDto.Token, passwordResetDto.Token);
+    var success = await userService.ResetPasswordAsync(passwordResetDto.Token, passwordResetDto.Password);
     if (success)
     {
         return Results.Ok("Password has been reset");

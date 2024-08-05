@@ -51,6 +51,12 @@ namespace MockTestApi.Models
 
     }
 
+    public class PasswordResetRequest
+    {
+        [JsonPropertyName("email")]
+        public string Email { get; set; }
+    }
+
     public class PasswordResetDto
     {
         [JsonPropertyName("token")]
