@@ -157,7 +157,7 @@ namespace MockTestApi.Services
             await _userRepository.CreateAsync(user);
         }
 
-        public async Task<bool> RequestPasswordResetAsync(string email)
+        public async Task<bool> RequestPasswordResetAsync(string email, string passwordResetUrl)
         {
             var user = await _userStore.GetByUsernameAsync(email);
             if (user == null)
@@ -178,10 +178,10 @@ namespace MockTestApi.Services
 
             await _passwordResetRepository.CreateAsync(resetToken);
 
-            var resetLink = $"https://yourdomain.com/reset-password?token={token}";
+            var resetLink = $"{passwordResetUrl}?token={token}";
 
             // Send the email (implement the IEmailSender interface)
-            await _emailService.SendEmailAsync(user.Email, "Password Reset", $"Please reset your password by clicking <a href='{resetLink}'>here</a>.");
+            //await _emailService.SendEmailAsync(user.Email, "Password Reset", $"Please reset your password by clicking <a href='{resetLink}'>here</a>.");
 
             return true;
         }

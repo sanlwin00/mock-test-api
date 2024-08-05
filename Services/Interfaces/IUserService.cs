@@ -13,7 +13,7 @@ namespace MockTestApi.Services.Interfaces
         Task<LoginResponse> AuthenticateAsync(LoginRequest loginRequest);
         Task<LoginResponse> AuthenticateWithAccessCodeAsync(string accessCode);
         Task<LoginResponse> RegisterUserAsync(RegisterRequest registerDto);
-        Task<bool> RequestPasswordResetAsync(string email);
+        Task<bool> RequestPasswordResetAsync(string email, string passwordResetUrl);
         Task<bool> ResetPasswordAsync(string token, string newPassword);
     }
 }

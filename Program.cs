@@ -221,7 +221,7 @@ app.MapGet("/auth/profile", async (HttpContext httpContext, IUserService userSer
 
 app.MapPost("/auth/request-password-reset", async (PasswordResetRequest passwordResetRequest, IUserService userService) =>
 {
-    var success = await userService.RequestPasswordResetAsync(passwordResetRequest.Email);
+    var success = await userService.RequestPasswordResetAsync(passwordResetRequest.Email, passwordResetRequest.PasswordResetUrl);
     if (success)
     {
         return Results.Ok("Password reset email sent");
