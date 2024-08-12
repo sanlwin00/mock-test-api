@@ -5,7 +5,7 @@ namespace MockTestApi.Services.Interfaces
     public interface IUserService
     {
         Task<IEnumerable<UserDto>> GetAllUsersAsync();
-        Task<UserDto> GetUserByIdAsync(string id);
+        Task<User> GetUserByIdAsync(string id);
         Task CreateUserAsync(User user);
         Task<bool> UpdateUserAsync(User user);
         Task<bool> UpdateUserAsync(string id, UpdateUserDto updateUserDto);

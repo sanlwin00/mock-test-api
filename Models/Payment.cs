@@ -2,13 +2,13 @@ namespace MockTestApi.Models
 {
     public class Payment : IEntity
     {
-        public string Id { get; set; } // _id in MongoDB, renamed to Id for C#
+        public string Id { get; set; } 
         public string PaymentRef { get; set; }
-        public decimal Amount { get; set; } // Using decimal for currency
+        public double Amount { get; set; } 
         public string Currency { get; set; }
         public string Status { get; set; }
         public string PaymentMethod { get; set; }
-        public string Customer { get; set; } // This might be a user ID or a customer ID
+        public string Customer { get; set; }
         public string Description { get; set; }
         public DateTime Created { get; set; }
         public BillingDetails BillingDetails { get; set; }
@@ -27,5 +27,20 @@ namespace MockTestApi.Models
         public string City { get; set; }
         public string State { get; set; }
         public string Country { get; set; }
+
+        public string PostalCode { get; set; }
+    }
+
+    public class PaymentDto
+    {
+        public string Id { get; set; }
+        public string PaymentRef { get; set; }
+        public double Amount { get; set; }
+        public string Currency { get; set; }
+        public string Status { get; set; }
+        public string PaymentMethod { get; set; }
+        public string Customer { get; set; }
+        public string Description { get; set; }
+        public DateTime Created { get; set; }
     }
 }

@@ -14,6 +14,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using System.Net.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -102,6 +104,9 @@ app.UseCors("AllowSpecificOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 
+// This is for Stripe API
+Stripe.StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
 // Seed data
 /*
 using (var scope = app.Services.CreateScope())
@@ -155,7 +160,7 @@ app.MapPost("/auth/register", async (IUserService userService, RegisterRequest r
         return Results.Json(response, statusCode: 500);
     }
 });
-app.MapPost("/auth/login", async (IUserService userService, IMapper mapper, LoginRequest loginRequest) =>
+app.MapPost("/auth/login", async (IUserService userService, LoginRequest loginRequest) =>
 {
     try
     {
@@ -179,7 +184,7 @@ app.MapPost("/auth/login", async (IUserService userService, IMapper mapper, Logi
         return Results.Json(response, statusCode: 500);
     }
 });
-app.MapPost("/auth/login/accesscode", async (IUserService userService, IMapper mapper, AccessCodeRequest accessCodeRequest) =>
+app.MapPost("/auth/login/accesscode", async (IUserService userService, AccessCodeRequest accessCodeRequest) =>
 {
     try
     {
@@ -203,20 +208,21 @@ app.MapPost("/auth/login/accesscode", async (IUserService userService, IMapper m
         return Results.Json(response, statusCode: 500);
     }
 });
-app.MapGet("/auth/profile", async (HttpContext httpContext, IUserService userService) => {
+app.MapGet("/auth/profile", async (HttpContext httpContext, IMapper mapper, IUserService userService) => {
     var userId = httpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
     if (userId == null)
     {
         return Results.Unauthorized();
     }
 
-    var user = await userService.GetUserByIdAsync(userId);
+    var user = await userService.GetUserByIdAsync(userId);   
     if (user == null)
     {
         return Results.NotFound();
     }
-    
-    return Results.Ok(user);
+
+    var userDto = mapper.Map<UserDto>(user);
+    return Results.Ok(userDto);
 }).RequireAuthorization();
 
 app.MapPost("/auth/request-password-reset", async (PasswordResetRequest passwordResetRequest, IUserService userService) =>
@@ -256,13 +262,53 @@ app.MapGet("/tests", async (ITestService testService) => await testService.GetAl
 //app.MapDelete("/tests/{id}", async (ITestService testService, string id) => await testService.DeleteTestAsync(id));
 
 // Payment endpoints
-app.MapGet("/payments", async (IPaymentService paymentService) => await paymentService.GetAllPaymentsAsync());
-app.MapGet("/payments/{id}", async (IPaymentService paymentService, string id) => await paymentService.GetPaymentByIdAsync(id));
-app.MapPost("/payments", async (IPaymentService paymentService, Payment payment) => await paymentService.CreatePaymentAsync(payment));
-app.MapPut("/payments/{id}", async (IPaymentService paymentService, Payment payment) => await paymentService.UpdatePaymentAsync(payment));
-app.MapDelete("/payments/{id}", async (IPaymentService paymentService, string id) => await paymentService.DeletePaymentAsync(id));
+//app.MapGet("/payments", async (IPaymentService paymentService) => await paymentService.GetAllPaymentsAsync());
+app.MapGet("/payments/validate_session/{sessionId}", async (HttpContext httpContext, IPaymentService paymentService, string sessionId) =>
+{
+    try
+    {
+        var userId = httpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        if (userId == null)
+        {
+            return Results.Unauthorized();
+        }
 
-// Notification endpoints
+        var payment = await paymentService.ValidateSession(sessionId, userId);
+        if (payment == null)
+        {
+            return Results.NotFound("Payment not found or validation failed.");
+        }
+        return Results.Ok(payment);
+    }
+    catch (Exception ex)
+    {
+        var response = new { message = ex.Message };
+        return Results.Json(response, statusCode: 500);
+    }
+}).RequireAuthorization(); ;
+app.MapPost("/payments/create_session", async (HttpContext httpContext, IPaymentService paymentService, StripeRequestDto stripeRequestDto) =>
+{
+    try
+    {
+        var userId = httpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+        if (userId == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var result = await paymentService.CreateSession(stripeRequestDto, userId);
+        return Results.Ok(result);
+    }
+    catch (Exception ex)
+    {
+        var response = new { message = ex.Message };
+        return Results.Json(response, statusCode: 500);
+    }
+}).RequireAuthorization();
+//app.MapPut("/payments/{id}", async (IPaymentService paymentService, Payment payment) => await paymentService.UpdatePaymentAsync(payment));
+//app.MapDelete("/payments/{id}", async (IPaymentService paymentService, string id) => await paymentService.DeletePaymentAsync(id));
+
+/* Notification endpoints
 app.MapGet("/notifications", async (INotificationService notificationService) => await notificationService.GetAllNotificationsAsync());
 app.MapGet("/notifications/{id}", async (INotificationService notificationService, string id) => await notificationService.GetNotificationByIdAsync(id));
 app.MapPost("/notifications", async (INotificationService notificationService, Notification notification) => await notificationService.CreateNotificationAsync(notification));
@@ -289,7 +335,7 @@ app.MapGet("/mocktesthistories/{id}", async (IMockTestHistoryService mockTestHis
 app.MapPost("/mocktesthistories", async (IMockTestHistoryService mockTestHistoryService, MockTestHistory mockTestHistory) => await mockTestHistoryService.CreateMockTestHistoryAsync(mockTestHistory));
 app.MapPut("/mocktesthistories/{id}", async (IMockTestHistoryService mockTestHistoryService, MockTestHistory mockTestHistory) => await mockTestHistoryService.UpdateMockTestHistoryAsync(mockTestHistory));
 app.MapDelete("/mocktesthistories/{id}", async (IMockTestHistoryService mockTestHistoryService, string id) => await mockTestHistoryService.DeleteMockTestHistoryAsync(id));
-
+*/
 app.MapGet("/", () => "Hello World!");
 
 app.Run();

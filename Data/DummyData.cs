@@ -110,7 +110,7 @@ namespace MockTestApi.Data
                 {
                     Id = ObjectId.GenerateNewId().ToString(), // Assuming ObjectId is a method to generate new IDs
                     PaymentRef = "session_12345",
-                    Amount = 9.99m,
+                    Amount = 9.99,
                     Currency = "USD",
                     Status = "completed",
                     PaymentMethod = "paypal", // Example method, adjust as needed

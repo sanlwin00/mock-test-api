@@ -109,12 +109,9 @@ namespace MockTestApi.Services
             return userDtos;
         }
 
-        public async Task<UserDto> GetUserByIdAsync(string id)
+        public async Task<User> GetUserByIdAsync(string id)
         {
-            var user = await _userRepository.GetByIdAsync(id);
-            var userDto = _mapper.Map<UserDto>(user);
-            
-            return userDto;
+            return await _userRepository.GetByIdAsync(id);
         }
 
         public async Task<bool> UpdateUserAsync(User user)
@@ -181,7 +178,7 @@ namespace MockTestApi.Services
             var resetLink = $"{passwordResetUrl}?token={token}";
 
             // Send the email (implement the IEmailSender interface)
-            //await _emailService.SendEmailAsync(user.Email, "Password Reset", $"Please reset your password by clicking <a href='{resetLink}'>here</a>.");
+            await _emailService.SendEmailAsync(user.Email, "Password Reset", $"Please reset your password by clicking <a href='{resetLink}'>here</a>.");
 
             return true;
         }

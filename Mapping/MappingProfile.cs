@@ -9,6 +9,7 @@ namespace MockTestApi.Mapping
         {
             CreateMap<User, UserDto>();
             CreateMap<Subscription, SubscriptionDto>();
+            CreateMap<Payment, PaymentDto>();
 
         }
     }
