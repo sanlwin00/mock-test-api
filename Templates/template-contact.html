@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Contact Form Submission</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <style>
+        body {
+            font-family: Tahoma, Verdana, Segoe, sans-serif;
+            margin: auto;
+            padding: 0;
+            background-color: #E5E5E5;
+            color: #393d47;
+            text-align: center;
+        }
+        .container {
+            background-color: #fff;
+			border: 1px solid #999;
+            max-width: 500px;
+            margin: 20px auto;
+			padding: 30px;
+			text-align: center;
+        }
+        .header img {
+            max-width: 100%;
+            height: auto;
+        }
+        h1 {
+            color: #393d47;
+            font-size: 25px;
+        }
+        .contact-info {
+            text-align: left; /* Align text to the left */
+            background-color: #f0f0f0; /* Background color for the contact-info section */
+            padding: 15px; /* Padding around the contact-info text */
+            margin: 20px 0; /* Margin around the contact-info section */
+            border-radius: 8px; /* Rounded corners for the contact-info section */
+        }
+        .footer {
+            font-size: smaller;
+            color: #393d47;
+            margin-top: 25px;
+            padding-top: 10px;
+            border-top: 1px dashed #D6D6D6;
+        }
+        .footer a {
+            color: #393d47;			
+        }
+    </style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<img src="https://ccacademy.ca/images/title-cca.png" alt="ccacademy.ca" />
+		</div>
+		<div class="content">
+			<h1>Thanks for contacting us.</h1>
+			<p>This is to acknowledge that your message has been received. We will get back to you as soon as we can.</p>			
+			<div class="contact-info"> 
+				<p>-- YOUR MESSAGE --</p> 
+				<table> 
+				<tr> <th>Name:</th> <td>{{Last}}, {{First}}</td> </tr> 
+				<tr> <th>Email:</th> <td>{{Email}}</td> </tr> 
+				<tr> <th>Contact No:</th> <td>{{Phone}}</td> </tr> 
+				<tr> <th>Attachments:</th> <td>{{AttachmentCount}}</td> </tr> 
+				<tr> <th>Message:</th> <td>{{Message}}</td> </tr> 
+				</table> 
+			</div>
+			<p style="font-size: small">If you do not hear from us within 48 hours, please feel free to write to us directly at <a href="mailto:support@ccacademy.ca">support@ccacademy.ca</a>.</p>
+		</div>	
+		<div class="footer">
+			<p>Copyright &copy;2022-2024 <a href="https://ccacademy.ca">ccacademy.ca</a></p>
+			<p><a href="https://ccacademy.ca/privacy-policy">Privacy Policy</a></p>
+		</div>
+	</div>	
+</body>
+</html>

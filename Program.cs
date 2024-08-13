@@ -16,8 +16,19 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Antiforgery;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add anti-forgery services
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-XSRF-TOKEN";
+    options.Cookie.Name = "XSRF-TOKEN";
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.None;
+});
 
 // Bind Smtp settings from configuration
 builder.Services.Configure<SmtpSetting>(builder.Configuration.GetSection("Smtp"));
@@ -84,23 +95,56 @@ builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<IMockTestService, MockTestService>();
 builder.Services.AddScoped<IMockTestHistoryRepository, MockTestHistoryRepository>();
 builder.Services.AddScoped<IMockTestHistoryService, MockTestHistoryService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IEmailService>(provider =>
+    new EmailService(
+        Path.Combine(Directory.GetCurrentDirectory(), "Templates"),
+        provider.GetRequiredService<IOptions<SmtpSetting>>()
+        )
+    );
+
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigins",
         policy =>
         {
-            policy.WithOrigins(builder.Configuration.GetValue<string>("AllowedHosts"))
+            var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+            policy.WithOrigins(allowedOrigins)
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .AllowCredentials();
         });
 });
-
 
 var app = builder.Build();
 
 app.UseCors("AllowSpecificOrigins");
+
+// Use anti-forgery middleware
+app.UseAntiforgery();
+app.Use(async (context, next) =>
+{
+    // Check if the request is for an API endpoint that requires anti-forgery
+    if (context.Request.Path.StartsWithSegments("/emails/send-contact-form") &&
+        context.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase))
+    {
+        var antiforgery = context.RequestServices.GetRequiredService<IAntiforgery>();
+        try
+        {
+            await antiforgery.ValidateRequestAsync(context);
+        }
+        catch (Exception ex)
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await context.Response.WriteAsync($"Antiforgery validation failed: {ex.Message}");
+            return;
+        }
+    }
+
+    await next();
+});
+
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -115,6 +159,28 @@ using (var scope = app.Services.CreateScope())
     SeedData(services);
 }
 */
+
+app.MapPost("/emails/send-contact-form", async ([FromForm] ContactFormRequest request, IEmailService emailService) =>
+{
+    try
+    {
+        await emailService.SendContactFormEmailAsync(
+            request.ToEmail,
+            request.FirstName,
+            request.LastName,
+            request.Phone,
+            request.Message,
+            request.Attachments
+        );
+
+        return Results.Ok("Email sent successfully");
+    }
+    catch (Exception ex)
+    {
+        var response = new { message = ex.Message };
+        return Results.Json(response, statusCode: 500);
+    }
+});
 
 // User endpoints
 //app.MapGet("/users", async (IUserService userService) => await userService.GetAllUsersAsync()).RequireAuthorization("AdminOnly");
@@ -242,7 +308,14 @@ app.MapPost("/auth/reset-password", async (PasswordResetDto passwordResetDto, IU
     {
         return Results.Ok("Password has been reset");
     }
-    return Results.BadRequest("Invalid or expired token");
+    return Results.BadRequest("Invalid or expired link. Please request for a new reset link.");
+});
+
+app.MapGet("/auth/csrf-token", (HttpContext context) =>
+{
+    var tokens = context.RequestServices.GetRequiredService<IAntiforgery>().GetAndStoreTokens(context);
+
+    return Results.Ok(new { token = tokens.RequestToken });
 });
 
 
@@ -305,6 +378,9 @@ app.MapPost("/payments/create_session", async (HttpContext httpContext, IPayment
         return Results.Json(response, statusCode: 500);
     }
 }).RequireAuthorization();
+
+
+
 //app.MapPut("/payments/{id}", async (IPaymentService paymentService, Payment payment) => await paymentService.UpdatePaymentAsync(payment));
 //app.MapDelete("/payments/{id}", async (IPaymentService paymentService, string id) => await paymentService.DeletePaymentAsync(id));
 

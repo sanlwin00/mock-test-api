@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Thank You</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <style>
+        body {
+            font-family: Tahoma, Verdana, Segoe, sans-serif;
+            margin: auto;
+            padding: 0;
+            background-color: #E5E5E5;
+            color: #393d47;
+            text-align: center;
+        }
+        .container {
+            background-color: #fff;
+			border: 1px solid #999;
+            max-width: 500px;
+            margin: 20px auto;
+			padding: 30px;
+			text-align: center;
+        }
+        .header img {
+            max-width: 100%;
+            height: auto;
+        }
+        h1 {
+            color: #393d47;
+            font-size: 25px;
+        }
+        .access-code {
+            font-weight: bold;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .login-link {
+			background-color: #FFC727;
+			color: #393d47;
+			padding: 15px 35px;
+			display: inline-block;
+			text-decoration: none;
+			border-radius: 15px; 
+			font-weight: bold; 
+			font-size: 18px; 
+			box-shadow: 0px 4px 8px rgba(0,0,0,0.2); 
+			border: none; 
+			cursor: pointer; 
+        }
+        .footer {
+            font-size: smaller;
+            color: #393d47;
+            margin-top: 25px;
+            padding-top: 10px;
+            border-top: 1px dashed #D6D6D6;
+        }
+        .footer a {
+            color: #393d47;
+        }
+    </style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<img src="https://ccacademy.ca/images/title-cca.png" alt="ccacademy.ca" />
+		</div>
+		<div class="content">
+			<h1>Thanks for the membership purchase</h1>
+			<p>Dear {{Name}}, You now have access to over 500 test questions to practice to ensure you pass with confidence.</p>
+			<small>Your membership is valid until <b>{{ValidUntil}}</b></small>
+			<p><a href="https://ccacademy.ca/login" class="login-link">LOGIN HERE</a></p>
+					
+		</div>	
+		<div class="footer">
+		<p style="font-size: small">If you encountered any problem accessing the site, please feel free to contact us at <a href="mailto:support@ccacademy.ca">support@ccacademy.ca</a>.</p>
+		<p>Copyright &copy;2022-2024 ccacademy.ca</p>
+		<p><a href="https://ccacademy.ca/privacy-policy">Privacy Policy</a></p>
+		</div>
+	</div>	
+</body>
+</html>

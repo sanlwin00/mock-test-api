@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Reset password</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <style>
+        body {
+            font-family: Tahoma, Verdana, Segoe, sans-serif;
+            margin: auto;
+            padding: 0;
+            background-color: #E5E5E5;
+            color: #393d47;
+            text-align: center;
+        }
+        .container {
+            background-color: #fff;
+			border: 1px solid #999;
+            max-width: 500px;
+            margin: 20px auto;
+			padding: 30px;
+			text-align: center;
+        }
+        .header img {
+            max-width: 100%;
+            height: auto;
+        }
+        h1 {
+            color: #393d47;
+            font-size: 25px;
+        }
+        .access-code {
+            font-weight: bold;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .login-link {
+			background-color: #FFC727;
+			color: #393d47;
+			padding: 15px 35px;
+			display: inline-block;
+			text-decoration: none;
+			border-radius: 15px; 
+			font-weight: bold; 
+			font-size: 18px; 
+			box-shadow: 0px 4px 8px rgba(0,0,0,0.2); 
+			border: none; 
+			cursor: pointer; 
+        }
+        .footer {
+            font-size: smaller;
+            color: #393d47;
+            margin-top: 25px;
+            padding-top: 10px;
+            border-top: 1px dashed #D6D6D6;
+        }
+        .footer a {
+            color: #393d47;
+        }
+    </style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<img src="https://ccacademy.ca/images/title-cca.png" alt="ccacademy.ca" />
+		</div>
+		<div class="content">
+			<h1>Forgot password?</h1>
+			<p>Not to worry, we got you! Let’s get you a new password. Please take note that the link will expire in 24 hours.</p>
+			<p><a href="{{reset_link}}" class="login-link">RESET PASSWORD</a></p>
+			<p style="font-size: small">If you encountered any problem accessing the site, please feel free to contact us at <a href="mailto:support@ccacademy.ca">support@ccacademy.ca</a>.</p>
+		</div>	
+		<div class="footer">
+		<p>Copyright &copy;2022-2024 ccacademy.ca</p>
+		<p><a href="https://ccacademy.ca/privacy-policy">Privacy Policy</a></p>
+		</div>
+	</div>	
+</body>
+</html>

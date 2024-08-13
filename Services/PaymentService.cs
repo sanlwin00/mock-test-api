@@ -18,11 +18,16 @@ namespace MockTestApi.Services
         private readonly IPaymentRepository _paymentRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        public PaymentService(IPaymentRepository paymentRepository, IMapper mapper, IUserService userService)
+        private readonly IEmailService _emailService;
+        public PaymentService(IPaymentRepository paymentRepository, 
+            IMapper mapper, 
+            IUserService userService,
+            IEmailService emailService)
         {
             _paymentRepository = paymentRepository;
             _mapper = mapper;
             _userService = userService;
+            _emailService = emailService;
         }
 
         public async Task<IEnumerable<Payment>> GetAllPaymentsAsync()
@@ -171,8 +176,13 @@ namespace MockTestApi.Services
                             user.Subscription.StartDate = DateTime.UtcNow;
                             user.Subscription.EndDate = DateTime.UtcNow.AddDays(30);
                             await _userService.UpdateUserAsync(user);
+
+                            string validUntil = Utility.ConvertToLocalTime(user.Subscription.EndDate, user.TimeZone).ToShortDateString();
+                            await _emailService.SendThankYouEmailAsync(user.Email, user.DisplayName, validUntil);
                         }
                     }
+
+                    
 
                     return _mapper.Map<PaymentDto>(payment);
                 }

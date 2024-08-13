@@ -7,6 +7,29 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Templates\template-contact.html" />
+    <None Remove="Templates\template-forgot.html" />
+    <None Remove="Templates\template-subscription.html" />
+    <None Remove="Templates\template-thankyou.html" />
+    <None Remove="Templates\template-welcome.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Templates\template-contact.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\template-forgot.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\template-thankyou.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\template-welcome.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.7" />
     <PackageReference Include="MongoDB.Driver" Version="2.25.0" />
@@ -15,6 +38,7 @@
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageReference Include="Stripe.net" Version="45.7.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
+    <PackageReference Include="TimeZoneConverter" Version="6.1.0" />
   </ItemGroup>
 
 </Project>

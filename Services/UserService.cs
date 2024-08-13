@@ -96,6 +96,8 @@ namespace MockTestApi.Services
             };
             await _userRepository.CreateAsync(user);
 
+            await _emailService.SendWelcomeEmailAsync(user.Email, user.DisplayName);
+
             var loginRequest = new LoginRequest { Username = registerDto.Email, Password = registerDto.Password };
             
             return await AuthenticateAsync(loginRequest);
@@ -178,7 +180,7 @@ namespace MockTestApi.Services
             var resetLink = $"{passwordResetUrl}?token={token}";
 
             // Send the email (implement the IEmailSender interface)
-            await _emailService.SendEmailAsync(user.Email, "Password Reset", $"Please reset your password by clicking <a href='{resetLink}'>here</a>.");
+            await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink);
 
             return true;
         }
