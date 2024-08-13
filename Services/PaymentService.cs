@@ -131,7 +131,12 @@ namespace MockTestApi.Services
                 PaymentIntent paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
 
                 if (paymentIntent != null)
-                {
+                {                    
+                    if (paymentIntent.Status.ToLower() == payment.Status.ToLower())
+                    {
+                        // no update required, just return the payment object
+                        return _mapper.Map<PaymentDto>(payment); 
+                    }
                     Log.Information("## Updating status and paymentIntent : {PaymentIntentId} ...", paymentIntent.Id);
                     payment.Status = paymentIntent.Status; 
                     payment.PaymentRef = paymentIntent.Id;
