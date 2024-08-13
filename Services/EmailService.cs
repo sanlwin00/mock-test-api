@@ -41,9 +41,9 @@ namespace MockTestApi.Services
                 .Replace("{{Phone}}", phone)
                 .Replace("{{Email}}", toEmail)
                 .Replace("{{Message}}", message)
-                .Replace("{{AttachmentCount}}", attachments?.Count().ToString() + " file(s)");
+                .Replace("{{AttachmentCount}}", (attachments == null ? "0" : attachments?.Count().ToString()) + " file(s)");
 
-            await SendEmailAsync(toEmail, "[ccacademy.ca] Contact Form Submission", emailBody, attachments);
+            await SendEmailAsync(toEmail, "[ccacademy.ca] Contact Form Submission", emailBody, attachments, "ccacademy.ca@gmail.com");
         }
 
         public async Task SendPasswordResetEmailAsync(string toEmail, string resetLink)
