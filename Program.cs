@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Antiforgery;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -177,6 +178,7 @@ app.MapPost("/emails/send-contact-form", async ([FromForm] ContactFormRequest re
     }
     catch (Exception ex)
     {
+        Log.Error("Exception occured: {@ex}", ex);
         var response = new { message = ex.Message };
         return Results.Json(response, statusCode: 500);
     }
@@ -378,8 +380,6 @@ app.MapPost("/payments/create_session", async (HttpContext httpContext, IPayment
         return Results.Json(response, statusCode: 500);
     }
 }).RequireAuthorization();
-
-
 
 //app.MapPut("/payments/{id}", async (IPaymentService paymentService, Payment payment) => await paymentService.UpdatePaymentAsync(payment));
 //app.MapDelete("/payments/{id}", async (IPaymentService paymentService, string id) => await paymentService.DeletePaymentAsync(id));

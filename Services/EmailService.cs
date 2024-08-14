@@ -80,7 +80,7 @@ namespace MockTestApi.Services
                 {
                     if (file.Length > 0)
                     {
-                        using var memoryStream = new MemoryStream();
+                        var memoryStream = new MemoryStream();
                         await file.CopyToAsync(memoryStream);
                         memoryStream.Position = 0;
 
@@ -97,9 +97,24 @@ namespace MockTestApi.Services
                 UseDefaultCredentials = false,
             };
 
-            await smtpClient.SendMailAsync(message);
-
-            message.Dispose();
+            try
+            {
+                await smtpClient.SendMailAsync(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending email: {ex.Message}");
+                throw ex;
+            }
+            finally
+            {
+                // Dispose of message and any attachments
+                foreach (var attachment in message.Attachments)
+                {
+                    attachment.Dispose();
+                }
+                message.Dispose();
+            }
         }
 
     }
