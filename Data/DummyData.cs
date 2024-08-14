@@ -57,21 +57,97 @@ namespace MockTestApi.Data
         {
             return new List<Question>
             {
+                // Multiple Choice Question 1
+                new Question
+                {
+                    Id = ObjectId.GenerateNewId().ToString(),
+                    Text = "What is the largest planet in our solar system?",
+                    Type = "MultipleChoice",
+                    Options = new List<Option>
+                    {
+                        new Option { Text = "Earth", IsCorrect = false, Image = "https://example.com/images/earth.jpg" },
+                        new Option { Text = "Jupiter", IsCorrect = true, Image = "https://example.com/images/jupiter.jpg" },
+                        new Option { Text = "Saturn", IsCorrect = false, Image = "https://example.com/images/saturn.jpg" },
+                        new Option { Text = "Mars", IsCorrect = false, Image = "https://example.com/images/mars.jpg" }
+                    },
+                    Tags = new List<string> { "planet", "solar system", "astronomy" },
+                    Explanation = "Jupiter is the largest planet in our solar system.",
+                    Reference = new Reference { Text = "NASA - Jupiter", Url = "https://example.com/jupiter" },
+                    Image = "https://example.com/images/jupiter_large.jpg",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                },
+
+                // Multiple Choice Question 2
+                new Question
+                {
+                    Id = ObjectId.GenerateNewId().ToString(),
+                    Text = "Which element has the chemical symbol 'O'?",
+                    Type = "MultipleChoice",
+                    Options = new List<Option>
+                    {
+                        new Option { Text = "Oxygen", IsCorrect = true, Image = "https://example.com/images/oxygen.jpg" },
+                        new Option { Text = "Gold", IsCorrect = false, Image = "https://example.com/images/gold.jpg" },
+                        new Option { Text = "Osmium", IsCorrect = false, Image = "https://example.com/images/osmium.jpg" },
+                        new Option { Text = "Silver", IsCorrect = false, Image = "https://example.com/images/silver.jpg" }
+                    },
+                    Tags = new List<string> { "chemistry", "elements", "periodic table" },
+                    Explanation = "The chemical symbol 'O' stands for Oxygen.",
+                    Reference = new Reference { Text = "Periodic Table", Url = "https://example.com/periodic_table" },
+                    Image = "https://example.com/images/oxygen_element.jpg",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                },
+
+                // Multiple Choice Question 3
+                new Question
+                {
+                    Id = ObjectId.GenerateNewId().ToString(),
+                    Text = "Who wrote 'To Kill a Mockingbird'?",
+                    Type = "MultipleChoice",
+                    Options = new List<Option>
+                    {
+                        new Option { Text = "Harper Lee", IsCorrect = true, Image = "https://example.com/images/harper_lee.jpg" },
+                        new Option { Text = "Mark Twain", IsCorrect = false, Image = "https://example.com/images/mark_twain.jpg" },
+                        new Option { Text = "J.K. Rowling", IsCorrect = false, Image = "https://example.com/images/jk_rowling.jpg" },
+                        new Option { Text = "Ernest Hemingway", IsCorrect = false, Image = "https://example.com/images/ernest_hemingway.jpg" }
+                    },
+                    Tags = new List<string> { "literature", "books", "authors" },
+                    Explanation = "'To Kill a Mockingbird' was written by Harper Lee.",
+                    Reference = new Reference { Text = "Harper Lee Biography", Url = "https://example.com/harper_lee" },
+                    Image = "https://example.com/images/to_kill_a_mockingbird.jpg",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                },
+
+                // Free Text Question 1
                 new Question
                 {
                     Id = ObjectId.GenerateNewId().ToString(),
                     Text = "What is the capital of France?",
-                    Options = new List<Option>
-                    {
-                        new Option { Text = "Paris", IsCorrect = true, Image = "https://example.com/images/paris.jpg" },
-                        new Option { Text = "London", IsCorrect = false, Image = "https://example.com/images/london.jpg" },
-                        new Option { Text = "Berlin", IsCorrect = false, Image = "https://example.com/images/berlin.jpg" },
-                        new Option { Text = "Madrid", IsCorrect = false, Image = "https://example.com/images/madrid.jpg" }
-                    },                    
-                    Tags = new List<string> { "capital", "Europe", "Geography" },
-                    Explanation = "Paris is the capital city of France.",
-                    Reference = new Reference { Text = "World Capitals", Url = "45" },
-                    Image = "https://example.com/images/capital_city.jpg",
+                    Type = "FreeText",
+                    Options = new List<Option>(), // No options needed for free-text questions
+                    CorrectAnswer = "Paris",
+                    Tags = new List<string> { "geography", "capital cities", "France" },
+                    Explanation = "The capital city of France is Paris.",
+                    Reference = new Reference { Text = "Capital Cities of Europe", Url = "https://example.com/capital_cities_europe" },
+                    Image = "https://example.com/images/paris.jpg",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                },
+
+                // Free Text Question 2
+                new Question
+                {
+                    Id = ObjectId.GenerateNewId().ToString(),
+                    Text = "Which country is known as the Land of the Rising Sun?",
+                    Type = "FreeText",
+                    Options = new List<Option>(), // No options needed for free-text questions
+                    CorrectAnswer = "Japan",
+                    Tags = new List<string> { "geography", "country names", "Japan" },
+                    Explanation = "Japan is often referred to as the Land of the Rising Sun.",
+                    Reference = new Reference { Text = "Japan Overview", Url = "https://example.com/japan_overview" },
+                    Image = "https://example.com/images/japan.jpg",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 }
@@ -86,6 +162,7 @@ namespace MockTestApi.Data
                 {
                     Id = ObjectId.GenerateNewId().ToString(),
                     Title = "Basic Geography Set",
+                    Sequence = 1,
                     Description = "A set of basic geography questions.",
                     Category = "Geography",
                     Questions = new List<QuestionAccess>

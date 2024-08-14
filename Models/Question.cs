@@ -4,7 +4,9 @@ namespace MockTestApi.Models
     {
         public string Id { get; set; }
         public string Text { get; set; }
-        public List<Option> Options { get; set; }
+        public string Type { get; set; }
+        public List<Option> Options { get; set; } // for multiple choice questions
+        public string CorrectAnswer { get; set; } // for free-text answers
         public List<string> Tags { get; set; }
         public string Explanation { get; set; }
         public Reference Reference { get; set; }

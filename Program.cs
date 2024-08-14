@@ -153,13 +153,11 @@ app.UseAuthorization();
 Stripe.StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 // Seed data
-/*
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     SeedData(services);
 }
-*/
 
 app.MapPost("/emails/send-contact-form", async ([FromForm] ContactFormRequest request, IEmailService emailService) =>
 {
@@ -472,11 +470,11 @@ void SeedData(IServiceProvider services)
     SeedCollection(database, "users", DummyData.GetUsers());
     SeedCollection(database, "questions", DummyData.GetQuestions());
     SeedCollection(database, "tests", DummyData.GetTests());
-    SeedCollection(database, "payments", DummyData.GetPayments());
-    SeedCollection(database, "notifications", DummyData.GetNotifications());
-    SeedCollection(database, "audit_logs", DummyData.GetAuditLogs());
-    SeedCollection(database, "mock_tests", DummyData.GetMockTests());
-    SeedCollection(database, "mock_test_histories", DummyData.GetMockTestHistories());
+    //SeedCollection(database, "payments", DummyData.GetPayments());
+    //SeedCollection(database, "notifications", DummyData.GetNotifications());
+    //SeedCollection(database, "audit_logs", DummyData.GetAuditLogs());
+    //SeedCollection(database, "mock_tests", DummyData.GetMockTests());
+    //SeedCollection(database, "mock_test_histories", DummyData.GetMockTestHistories());
 }
 
 void SeedCollection<T>(IMongoDatabase database, string collectionName, List<T> items) where T : IEntity
