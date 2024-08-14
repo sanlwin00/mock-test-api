@@ -67,12 +67,11 @@ namespace MockTestApi.Data
                         new Option { Text = "London", IsCorrect = false, Image = "https://example.com/images/london.jpg" },
                         new Option { Text = "Berlin", IsCorrect = false, Image = "https://example.com/images/berlin.jpg" },
                         new Option { Text = "Madrid", IsCorrect = false, Image = "https://example.com/images/madrid.jpg" }
-                    },
-                    Category = "Geography",
-                    Tags = new List<string> { "capital", "Europe" },
+                    },                    
+                    Tags = new List<string> { "capital", "Europe", "Geography" },
                     Explanation = "Paris is the capital city of France.",
                     Reference = new Reference { Text = "World Capitals", Url = "45" },
-                    QuestionImage = "https://example.com/images/capital_city.jpg",
+                    Image = "https://example.com/images/capital_city.jpg",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 }
@@ -88,6 +87,7 @@ namespace MockTestApi.Data
                     Id = ObjectId.GenerateNewId().ToString(),
                     Title = "Basic Geography Set",
                     Description = "A set of basic geography questions.",
+                    Category = "Geography",
                     Questions = new List<QuestionAccess>
                     {
                         new QuestionAccess { QuestionId = ObjectId.GenerateNewId().ToString(), Access = "free" },
