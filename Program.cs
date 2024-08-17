@@ -19,6 +19,7 @@ using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Antiforgery;
 using Serilog;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +79,7 @@ RegisterRepositories(builder.Services);
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserStore, MongoUserStore>();
@@ -96,6 +98,7 @@ builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<IMockTestService, MockTestService>();
 builder.Services.AddScoped<IMockTestHistoryRepository, MockTestHistoryRepository>();
 builder.Services.AddScoped<IMockTestHistoryService, MockTestHistoryService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IEmailService>(provider =>
     new EmailService(
         Path.Combine(Directory.GetCurrentDirectory(), "Templates"),
@@ -158,6 +161,26 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     SeedData(services);
 }
+
+app.MapGet("/chat/config", (IChatService chatService) =>
+{
+    return Results.Ok(chatService.LoadChatBotBaseConfiguration());
+});
+
+app.MapPost("/chat/send", async (ChatRequest chatRequest, IChatService chatService) =>
+{
+    try
+    {
+        var chatResponse = await chatService.GenerateChatResponseAsync(chatRequest.LastPrompt, chatRequest.ConversationHistory, chatRequest.Context);
+        return Results.Ok(chatResponse);
+    }
+    catch (Exception ex)
+    {
+        Log.Error("Exception occured: {@ex}", ex);
+        var response = new { message = ex.Message };
+        return Results.Json(response, statusCode: 500);
+    }
+});
 
 app.MapPost("/emails/send-contact-form", async ([FromForm] ContactFormRequest request, IEmailService emailService) =>
 {
