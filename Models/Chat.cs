@@ -1,4 +1,6 @@
-﻿namespace MockTestApi.Models
+﻿using System.Text.Json.Serialization;
+
+namespace MockTestApi.Models
 {
     public class OpenApiSetting
     {
@@ -10,6 +12,7 @@
         public string LastPrompt { get; set; }
         public List<ChatMessage> ConversationHistory { get; set; }
         public string? Context { get; set; }
+        public string? ImageUrl { get; set; }
     }
 
     public class ChatMessage
@@ -51,5 +54,26 @@
     {
         public string ButtonText { get; set; }
         public string ButtonPrompt { get; set; }
+    }
+
+    public class ErrorResponse
+    {
+        [JsonPropertyName("error")]
+        public ErrorDetail Error { get; set; }
+
+        public class ErrorDetail
+        {
+            [JsonPropertyName("message")]
+            public string Message { get; set; }
+
+            [JsonPropertyName("type")]
+            public string Type { get; set; }
+
+            [JsonPropertyName("param")]
+            public string Param { get; set; }
+
+            [JsonPropertyName("code")]
+            public string Code { get; set; }
+        }
     }
 }

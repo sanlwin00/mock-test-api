@@ -32,28 +32,72 @@ namespace MockTestApi.Services
             };
         }
 
-        public async Task<ChatResponse> GenerateChatResponseAsync(string lastPrompt, List<ChatMessage> conversationHistory, string context = null)
+        public async Task<ChatResponse> GenerateChatResponseAsync(
+            string lastPrompt,
+            List<ChatMessage> conversationHistory,
+            string context = null,
+            string imageUrl = null)
         {
-            var systemPrompt = "You are a tutor assisting primary six students who are preparing for PSLE exam in Singapore."
-                + " Answer the topics related to PSLE exam questions such as Math and Science in a simple and concise for children to understand. "
-                + " If the user asks further questions related to the context, answer it. If it's out of context, say sorry I can't assist you with that. ";
-            if (context != null)
-            {
-                systemPrompt += " Use this as a context: " + context;
-            }
+            var messages = CreateMessages(lastPrompt, imageUrl, context);
 
             var requestBody = new
             {
-                model = "gpt-3.5-turbo",
+                model = "gpt-4o-mini", //"gpt-3.5-turbo",
                 temperature = 0.7,
-                messages = new[]
-                {
-                    new { role = "system", content = systemPrompt },
-                    new { role = "user", content = lastPrompt }
-                }
+                messages = messages,
+                max_tokens = 1000
             };
 
-            HttpClient client = _httpClientFactory.CreateClient();
+            return await SendRequestAsync(requestBody);
+        }
+
+        private string CreateSystemPrompt(string context)
+        {
+            var basePrompt = "You are a tutor assisting primary six students who are preparing for PSLE exam in Singapore."
+                              + " Answer the topics related to PSLE exam questions such as Math and Science in a simple and concise manner for children to understand. "
+                              + " If the user asks further questions related to the context, answer them. If it's out of context, say sorry I can't assist you with that.";
+
+            if (!string.IsNullOrEmpty(context))
+            {
+                basePrompt += " Use this as a context: " + context;
+            }
+
+            return basePrompt;
+        }
+
+        private List<object> CreateMessages(string lastPrompt, string? imageUrl, string? context)
+        {
+            var messages = new List<object>
+            {
+                new { role = "system", content = CreateSystemPrompt(context) }
+            };
+
+            var userMessage = new
+            {
+                role = "user",
+                content = new object[]
+                {
+                    new { type = "text", text = lastPrompt },
+                        imageUrl != null ? new
+                        {
+                            type = "image_url",
+                            image_url = new
+                            {
+                                url = imageUrl,
+                                detail = "high"
+                            }
+                        } : null
+                }.Where(x => x != null) // Filter out null image values
+            };
+
+            messages.Add(userMessage);
+
+            return messages;
+        }
+
+        private async Task<ChatResponse> SendRequestAsync(object requestBody)
+        {
+            using var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _apiSetting.ApiSecret);
 
             var jsonRequestBody = JsonSerializer.Serialize(requestBody);
@@ -61,14 +105,15 @@ namespace MockTestApi.Services
 
             var response = await client.PostAsync(_apiSetting.ApiUrl, content);
 
-            //HttpResponseMessage response = await client.PostAsJsonAsync(_apiUrl, requestBody);
             if (!response.IsSuccessStatusCode)
             {
-                Log.Error("Failed to get response from OpenAI. Response:${response}", response);
+                Log.Error("Failed to get response from OpenAI. Response: {response}", response);
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(errorContent);
                 return new ChatResponse
                 {
                     Success = false,
-                    Result = $"Failed to get response from OpenAI. {response.ReasonPhrase}"
+                    Result = $"Failed to get response from OpenAI. {errorResponse?.Error.Message}"
                 };
             }
 
@@ -88,5 +133,6 @@ namespace MockTestApi.Services
                 Result = responseContent.Choices.First().Message.Content
             };
         }
+
     }
 }

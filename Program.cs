@@ -172,7 +172,7 @@ app.MapPost("/chat/send", async (ChatRequest chatRequest, IChatService chatServi
 {
     try
     {
-        var chatResponse = await chatService.GenerateChatResponseAsync(chatRequest.LastPrompt, chatRequest.ConversationHistory, chatRequest.Context);
+        var chatResponse = await chatService.GenerateChatResponseAsync(chatRequest.LastPrompt, chatRequest.ConversationHistory, chatRequest.Context, chatRequest.ImageUrl);
         return Results.Ok(chatResponse);
     }
     catch (Exception ex)
