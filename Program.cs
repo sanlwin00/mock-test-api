@@ -32,8 +32,9 @@ builder.Services.AddAntiforgery(options =>
     options.Cookie.SameSite = SameSiteMode.None;
 });
 
-// Bind Smtp settings from configuration
+// Bind settings from configuration
 builder.Services.Configure<SmtpSetting>(builder.Configuration.GetSection("Smtp"));
+builder.Services.Configure<OpenApiSetting>(builder.Configuration.GetSection("OpenApi"));
 
 // Configure JWT 
 var jwtSettings = builder.Configuration.GetSection("Jwt");

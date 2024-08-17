@@ -1,4 +1,5 @@
-﻿using MockTestApi.Models;
+﻿using Microsoft.Extensions.Options;
+using MockTestApi.Models;
 using MockTestApi.Services.Interfaces;
 using Serilog;
 using System.Text;
@@ -9,11 +10,11 @@ namespace MockTestApi.Services
     public class ChatService : IChatService
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly string _apiUrl = "https://api.openai.com/v1/chat/completions";
-        private readonly string _apiKey = "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";
-        public ChatService(IHttpClientFactory httpClientFactory)
+        private readonly OpenApiSetting _apiSetting;
+        public ChatService(IHttpClientFactory httpClientFactory, IOptions<OpenApiSetting> apiSetting)
         {
             _httpClientFactory = httpClientFactory;
+            _apiSetting = apiSetting.Value;
         }
         public BotConfiguration LoadChatBotBaseConfiguration()
         {
@@ -53,12 +54,12 @@ namespace MockTestApi.Services
             };
 
             HttpClient client = _httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _apiKey);
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _apiSetting.ApiSecret);
 
             var jsonRequestBody = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(jsonRequestBody, Encoding.UTF8, "application/json");
 
-            var response = await client.PostAsync(_apiUrl, content);
+            var response = await client.PostAsync(_apiSetting.ApiUrl, content);
 
             //HttpResponseMessage response = await client.PostAsJsonAsync(_apiUrl, requestBody);
             if (!response.IsSuccessStatusCode)

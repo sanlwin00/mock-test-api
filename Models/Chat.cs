@@ -1,5 +1,10 @@
 ﻿namespace MockTestApi.Models
 {
+    public class OpenApiSetting
+    {
+        public string ApiUrl { get; set; }
+        public string ApiSecret { get; set; }
+    }
     public class ChatRequest
     {
         public string LastPrompt { get; set; }
