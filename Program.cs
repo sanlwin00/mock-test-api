@@ -20,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Antiforgery;
 using Serilog;
 using System.Text.Json;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,8 +34,10 @@ builder.Services.AddAntiforgery(options =>
 });
 
 // Bind settings from configuration
+builder.Services.Configure<MailTemplateSettings>(builder.Configuration.GetSection("MailTemplateSettings"));
 builder.Services.Configure<SmtpSetting>(builder.Configuration.GetSection("Smtp"));
 builder.Services.Configure<OpenApiSetting>(builder.Configuration.GetSection("OpenApi"));
+builder.Services.Configure<MyDbSettings>(builder.Configuration.GetSection("MongoDB"));
 
 // Configure JWT 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -67,7 +70,6 @@ builder.Services.AddAuthorization(options =>
 
 // Configure MongoDB
 MongoConfig.RegisterConventions();
-builder.Services.Configure<MyDbSettings>(builder.Configuration.GetSection("MongoDB"));
 builder.Services.AddSingleton<IMongoDatabase>(sp =>
 {
     var settings = sp.GetRequiredService<IOptions<MyDbSettings>>().Value;
@@ -100,13 +102,7 @@ builder.Services.AddScoped<IMockTestService, MockTestService>();
 builder.Services.AddScoped<IMockTestHistoryRepository, MockTestHistoryRepository>();
 builder.Services.AddScoped<IMockTestHistoryService, MockTestHistoryService>();
 builder.Services.AddScoped<IChatService, ChatService>();
-builder.Services.AddScoped<IEmailService>(provider =>
-    new EmailService(
-        Path.Combine(Directory.GetCurrentDirectory(), "Templates"),
-        provider.GetRequiredService<IOptions<SmtpSetting>>()
-        )
-    );
-
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddCors(options =>
 {
@@ -124,6 +120,9 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AllowSpecificOrigins");
+
+//** Moved up to solve 'Anti-Forgery Token was meant for a different claims-based user' issue
+app.UseAuthentication();
 
 // Use anti-forgery middleware
 app.UseAntiforgery();
@@ -150,7 +149,6 @@ app.Use(async (context, next) =>
 });
 
 
-app.UseAuthentication();
 app.UseAuthorization();
 
 // This is for Stripe API

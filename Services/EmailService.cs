@@ -9,32 +9,41 @@ namespace MockTestApi.Services
     public class EmailService : IEmailService
     {
         private readonly SmtpSetting _smtpSetting;
-        private readonly string _templatePath;
-        public EmailService(string templatePath, IOptions<SmtpSetting> smtpOptions)
+        private readonly MailTemplateSettings _templateSettings;
+        public EmailService(IOptions<SmtpSetting> smtpSettings, IOptions<MailTemplateSettings> templateSettings)
         {
-            _smtpSetting = smtpOptions.Value;
-            _templatePath = templatePath;
+            _smtpSetting = smtpSettings.Value;
+            _templateSettings = templateSettings.Value;
         }
 
         private async Task<string> LoadTemplateAsync(string templateFileName)
         {
-            var templatePath = Path.Combine(_templatePath, templateFileName);
-            return await File.ReadAllTextAsync(templatePath);
+            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), _templateSettings.TemplateFolder, templateFileName);
+            var templateContent = await File.ReadAllTextAsync(templatePath);
+            templateContent = templateContent
+               .Replace("{{AppName}}", _templateSettings.AppName)
+               .Replace("{{StartYear}}", _templateSettings.StartYear)
+               .Replace("{{CurrentYear}}", DateTime.UtcNow.Year.ToString())
+               .Replace("{{ContactEmail}}", _templateSettings.ContactEmail)
+               .Replace("{{HeaderImageUrl}}", _templateSettings.HeaderImageUrl)
+               .Replace("{{LoginUrl}}", _templateSettings.LoginUrl)
+               .Replace("{{PrivacyPolicyUrl}}", _templateSettings.PrivacyPolicyUrl);
+            return templateContent;
         }
 
         public async Task SendThankYouEmailAsync(string toEmail, string name, string validUntil)
         {
-            var template = await LoadTemplateAsync("template-thankyou.html");
+            var template = await LoadTemplateAsync(_templateSettings.ThankYouTemplate);
             var emailBody = template
                 .Replace("{{Name}}", name)
                 .Replace("{{ValidUntil}}", validUntil);
 
-            await SendEmailAsync(toEmail, "[ccacademy.ca] Welcome!", emailBody);
+            await SendEmailAsync(toEmail, $"[{_templateSettings.AppName}] Welcome!", emailBody);
         }
 
         public async Task SendContactFormEmailAsync(string toEmail, string firstName, string lastName, string phone, string message, List<IFormFile>? attachments = null)
         {
-            var template = await LoadTemplateAsync("template-contact.html");
+            var template = await LoadTemplateAsync(_templateSettings.EnquiryTemplate);
             var emailBody = template
                 .Replace("{{First}}", firstName)
                 .Replace("{{Last}}", lastName)
@@ -43,23 +52,23 @@ namespace MockTestApi.Services
                 .Replace("{{Message}}", message)
                 .Replace("{{AttachmentCount}}", (attachments == null ? "0" : attachments?.Count().ToString()) + " file(s)");
 
-            await SendEmailAsync(toEmail, "[ccacademy.ca] Contact Form Submission", emailBody, attachments, "ccacademy.ca@gmail.com");
+            await SendEmailAsync(toEmail, $"[{_templateSettings.AppName}] Message received", emailBody, attachments, _templateSettings.CcEmail);
         }
 
         public async Task SendPasswordResetEmailAsync(string toEmail, string resetLink)
         {
-            var template = await LoadTemplateAsync("template-forgot.html");
+            var template = await LoadTemplateAsync(_templateSettings.PasswordResetTemplate);
             var emailBody = template.Replace("{{reset_link}}", resetLink);
 
-            await SendEmailAsync(toEmail, "[ccacademy.ca] Password Reset", emailBody);
+            await SendEmailAsync(toEmail, $"[{_templateSettings.AppName}] Password Reset", emailBody);
         }
 
         public async Task SendWelcomeEmailAsync(string toEmail, string name)
         {
-            var template = await LoadTemplateAsync("template-welcome.html");
+            var template = await LoadTemplateAsync(_templateSettings.SignUpTemplate);
             var emailBody = template.Replace("{{Name}}", name);
 
-            await SendEmailAsync(toEmail, "[ccacademy.ca] Registration successful", emailBody);
+            await SendEmailAsync(toEmail, $"[{_templateSettings.AppName}] Sign up successful", emailBody);
         }
         public async Task SendEmailAsync(string to, string subject, string body, List<IFormFile>? attachments = null, string cc = null, string bcc = null)
         {
