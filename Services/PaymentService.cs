@@ -59,6 +59,8 @@ namespace MockTestApi.Services
         {
             try
             {
+                var user = await _userService.GetUserByIdAsync(userId);
+
                 var options = new SessionCreateOptions
                 {
                     LineItems = new List<SessionLineItemOptions>(),
@@ -66,6 +68,7 @@ namespace MockTestApi.Services
                     SuccessUrl = stripeRequestDto.ApprovedUrl,
                     CancelUrl = stripeRequestDto.CancelUrl,
                     AutomaticTax = new SessionAutomaticTaxOptions { Enabled = true },
+                    CustomerEmail = user.Email,
                 };
 
                 var stripeLineItem = new SessionLineItemOptions
