@@ -1,0 +1,15 @@
+I'm going to build a Micro Saas application:
+- it hosts pre-defined sample questions, answers and references for various categories such as IQ test, Driving test, Citizenship Test and so on.
+- mock tests will be available which comprises a set of questions for each category with passing score and time limit. For example, 20 questions for Citizenship Mock Test 1 with the passing score of 75% and a duration of 30mins.
+- On the home page, a list of mock tests will be displayed for each category. The user can click on one of the mock tests to begin the test.
+- The user will be prompted with an option to select a test mode "Practice" or "Simulation". 
+- In the Practice mode, there is no time limit. After each question, the result will be displayed immediately (Correct or Incorrect) together with the explanation.
+- In Simulation mode, time limit will be set and the result will only be displayed after all the questions have been answered or time out.
+- Whenever the user has taken the test, a history record will be created for them to review later on.
+- Only a limited number of mock tests are free to use. The rest are for the members only. 
+- The user will be prompted to sign up when they click on the mock tests which are not free.
+- There will be 2 membership options (FREE and PREMIUM) for signing up. They can enter their info to register.
+- When premium is selected, they will be redirected to Stripe Payment to complete the payment after registration.
+- The user should have an ability to edit their profile information in the application and terminate their subscription at any time.
+-------------
+TASK: YOU are a technical writer. Write a comprehensive and concise functional requirement document along with use case and sequence diagrams (using PlantUML syntax) for the developers.

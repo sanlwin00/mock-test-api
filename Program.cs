@@ -103,6 +103,8 @@ builder.Services.AddScoped<IMockTestHistoryRepository, MockTestHistoryRepository
 builder.Services.AddScoped<IMockTestHistoryService, MockTestHistoryService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IReferenceMaterialRepository, ReferenceMaterialRepository>();    
+builder.Services.AddScoped<IReferenceMaterialService, ReferenceMaterialService>();
 
 builder.Services.AddCors(options =>
 {
@@ -356,6 +358,9 @@ app.MapGet("/tests", async (ITestService testService) => await testService.GetAl
 //app.MapPut("/tests/{id}", async (ITestService testService, Test test) => await testService.UpdateTestAsync(test));
 //app.MapDelete("/tests/{id}", async (ITestService testService, string id) => await testService.DeleteTestAsync(id));
 
+// ReferenceMaterial endpoints
+app.MapGet("/references/{id}", async (IReferenceMaterialService referenceMaterialService, string id) => await referenceMaterialService.GetReferenceMaterialByIdAsync(id));
+
 // Payment endpoints
 //app.MapGet("/payments", async (IPaymentService paymentService) => await paymentService.GetAllPaymentsAsync());
 app.MapGet("/payments/validate_session/{sessionId}", async (HttpContext httpContext, IPaymentService paymentService, string sessionId) =>
@@ -483,6 +488,11 @@ void RegisterRepositories(IServiceCollection services)
         var database = sp.GetRequiredService<IMongoDatabase>();
         return new MongoRepository<PasswordResetToken>(database, "password_reset_token");
     });
+    services.AddScoped<IRepository<ReferenceMaterial>>(sp =>
+    {
+        var database = sp.GetRequiredService<IMongoDatabase>();
+        return new MongoRepository<ReferenceMaterial>(database, "reference_materials");
+    });
 }
 
 void SeedData(IServiceProvider services)
@@ -492,6 +502,7 @@ void SeedData(IServiceProvider services)
     SeedCollection(database, "users", DummyData.GetUsers());
     SeedCollection(database, "questions", DummyData.GetQuestions());
     SeedCollection(database, "tests", DummyData.GetTests());
+    SeedCollection(database, "reference_materials", DummyData.GetReferenceMaterials());
     //SeedCollection(database, "payments", DummyData.GetPayments());
     //SeedCollection(database, "notifications", DummyData.GetNotifications());
     //SeedCollection(database, "audit_logs", DummyData.GetAuditLogs());

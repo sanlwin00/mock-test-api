@@ -179,6 +179,27 @@ namespace MockTestApi.Data
             };
         }
 
+        public static List<ReferenceMaterial> GetReferenceMaterials()
+        {
+            return new List<ReferenceMaterial>
+            {
+                new ReferenceMaterial
+                {
+                    Id = "toefl-article-001",
+                    Title = "Examining the Problem of Bycatch",
+                    Category = "toefl",
+                    Content = new List<string>
+                    {
+                        "1. A topic of increasing relevance to the conservation of marine life is bycatch—fish and other animals that are unintentionally caught in the process of fishing for a targeted population of fish. Bycatch is a common occurrence in longline fishing, which utilizes a long heavy fishing line with baited hooks placed at intervals, and in trawling, which utilizes a fishing net (trawl) that is dragged along the ocean floor or through the mid-ocean waters. Few fisheries employ gear that can catch one species to the exclusion of all others. Dolphins, whales, and turtles are frequently captured in nets set for tunas and billfishes, and seabirds and turtles are caught in longline sets. Because bycatch often goes unreported, it is difficult to accurately estimate its extent. Available data indicate that discarded biomass (organic matter from living things) amounts to 25–30 percent of official catch, or about 30 million metric tons.",
+                        "2. The bycatch problem is particularly acute when trawl nets with small mesh sizes (smaller-than-average holes in the net material) are dragged along the bottom of the ocean in pursuit of groundfish or shrimp. Because of the small mesh size of the shrimp trawl nets, most of the fishes captured are either juveniles (young), smaller than legal size limits, or undesirable small species. Even larger mesh sizes do not prevent bycatch because once the net begins to fill with fish or shrimp, small individuals caught subsequently are trapped without ever encountering the mesh. In any case, these incidental captures are unmarketable and are usually shoveled back over the side of the vessel dead or dying."
+                    },
+                    Tags = new List<string> { "reading", "marine-life", "fishing", "environment" },
+                    CreatedAt = DateTime.Parse("2024-08-24T10:00:00Z"),
+                    UpdatedAt = DateTime.Parse("2024-08-24T10:00:00Z")
+                }
+            };
+        }
+
         public static List<Payment> GetPayments()
         {
             return new List<Payment>
