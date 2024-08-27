@@ -60,7 +60,7 @@ namespace MockTestApi.Data
                 // Multiple Choice Question 1
                 new Question
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = "g001",
                     Text = "What is the largest planet in our solar system?",
                     Type = "MultipleChoice",
                     Options = new List<Option>
@@ -81,7 +81,7 @@ namespace MockTestApi.Data
                 // Multiple Choice Question 2
                 new Question
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = "c001",
                     Text = "Which element has the chemical symbol 'O'?",
                     Type = "MultipleChoice",
                     Options = new List<Option>
@@ -102,7 +102,7 @@ namespace MockTestApi.Data
                 // Multiple Choice Question 3
                 new Question
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = "h001",
                     Text = "Who wrote 'To Kill a Mockingbird'?",
                     Type = "MultipleChoice",
                     Options = new List<Option>
@@ -123,7 +123,7 @@ namespace MockTestApi.Data
                 // Free Text Question 1
                 new Question
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = "g002",
                     Text = "What is the capital of France?",
                     Type = "FreeText",
                     Options = new List<Option>(), // No options needed for free-text questions
@@ -139,7 +139,7 @@ namespace MockTestApi.Data
                 // Free Text Question 2
                 new Question
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = "g003",
                     Text = "Which country is known as the Land of the Rising Sun?",
                     Type = "FreeText",
                     Options = new List<Option>(), // No options needed for free-text questions
@@ -161,15 +161,35 @@ namespace MockTestApi.Data
                 new Test
                 {
                     Id = ObjectId.GenerateNewId().ToString(),
-                    Title = "Basic Geography Set",
+                    Title = "Sample Question Set",
                     Sequence = 1,
-                    Description = "A set of basic geography questions.",
-                    Category = "Geography",
+                    Description = "A set of basic trivia questions.",
+                    Category = "mock",
                     Questions = new List<QuestionAccess>
                     {
-                        new QuestionAccess { QuestionId = ObjectId.GenerateNewId().ToString(), Access = "free" },
-                        new QuestionAccess { QuestionId = ObjectId.GenerateNewId().ToString(), Access = "free" },
-                        new QuestionAccess { QuestionId = ObjectId.GenerateNewId().ToString(), Access = "free" }
+                        new QuestionAccess { QuestionId = "g001", Access = "free" },
+                        new QuestionAccess { QuestionId = "c002", Access = "free" },
+                        new QuestionAccess { QuestionId = "g002", Access = "free" },
+                        new QuestionAccess { QuestionId = "h002", Access = "free" },
+                        new QuestionAccess { QuestionId = "g003", Access = "free" }
+                    },
+                    Access = "free",
+                    CreatedBy = ObjectId.GenerateNewId().ToString(),
+                    CreatedAt = DateTime.UtcNow,
+                    ModifiedAt = DateTime.UtcNow
+                },
+                new Test
+                {
+                    Id = ObjectId.GenerateNewId().ToString(),
+                    Title = "Geography",
+                    Sequence = 1,
+                    Description = "A set of basic geography questions.",
+                    Category = "topic",
+                    Questions = new List<QuestionAccess>
+                    {
+                        new QuestionAccess { QuestionId = "g001", Access = "free" },
+                        new QuestionAccess { QuestionId = "g002", Access = "free" },
+                        new QuestionAccess { QuestionId = "g003", Access = "free" }
                     },
                     Access = "free",
                     CreatedBy = ObjectId.GenerateNewId().ToString(),

@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Antiforgery;
 using Serilog;
 using System.Text.Json;
 using Stripe;
+using MongoDB.Bson;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,9 +74,44 @@ MongoConfig.RegisterConventions();
 builder.Services.AddSingleton<IMongoDatabase>(sp =>
 {
     var settings = sp.GetRequiredService<IOptions<MyDbSettings>>().Value;
-    var client = new MongoClient(settings.ConnectionString);
-    return client.GetDatabase(settings.DatabaseName);
+
+    var username = Environment.GetEnvironmentVariable("MONGO_USERNAME")
+        ?? throw new InvalidOperationException("MONGO_USERNAME environment variable is not set.");
+    var password = Environment.GetEnvironmentVariable("MONGO_PASSWORD")
+        ?? throw new InvalidOperationException("MONGO_PASSWORD environment variable is not set.");
+
+    var connectionString = settings.ConnectionString
+        .Replace("{USERNAME}", username)
+        .Replace("{PASSWORD}", password);
+
+    try
+    {
+        var client = new MongoClient(connectionString);
+        var database = client.GetDatabase(settings.DatabaseName);
+        
+        // perform a ping test to ensure the connection is successful
+        database.RunCommandAsync((Command<BsonDocument>)"{ping:1}").Wait();
+
+        return database;
+    }
+    catch (MongoConnectionException ex)
+    {
+        // Log the exception and provide a meaningful error message
+        Console.WriteLine($"Error connecting to MongoDB {settings.ConnectionString}: {ex.Message}");
+        throw new ApplicationException("Failed to connect to the MongoDB server. Please check your connection settings.", ex);
+    }
+    catch (TimeoutException ex)
+    {
+        Console.WriteLine($"Connection to MongoDB {settings.ConnectionString} timed out: {ex.Message}");
+        throw new ApplicationException("MongoDB connection timed out. Please check if the server is running and accessible.", ex);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"An unexpected error occurred while connecting to MongoDB: {ex.Message}");
+        throw new ApplicationException("An unexpected error occurred while connecting to the MongoDB server.", ex);
+    }
 });
+
 
 RegisterRepositories(builder.Services);
 //-------
@@ -106,16 +142,30 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IReferenceMaterialRepository, ReferenceMaterialRepository>();    
 builder.Services.AddScoped<IReferenceMaterialService, ReferenceMaterialService>();
 
+
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+// Check for wildcard CORS
+bool allowAnyOrigin = allowedOrigins != null && allowedOrigins.Contains("*");
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigins",
         policy =>
         {
-            var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
-            policy.WithOrigins(allowedOrigins)
+            if (allowAnyOrigin)
+            {
+                policy.AllowAnyOrigin()
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
+            }
+            else
+            {
+                policy.WithOrigins(allowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+            }
         });
 });
 
