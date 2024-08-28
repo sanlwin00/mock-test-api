@@ -65,15 +65,15 @@ namespace MockTestApi.Data
                     Type = "MultipleChoice",
                     Options = new List<Option>
                     {
-                        new Option { Text = "Earth", IsCorrect = false, Image = "https://example.com/images/earth.jpg" },
-                        new Option { Text = "Jupiter", IsCorrect = true, Image = "https://example.com/images/jupiter.jpg" },
-                        new Option { Text = "Saturn", IsCorrect = false, Image = "https://example.com/images/saturn.jpg" },
-                        new Option { Text = "Mars", IsCorrect = false, Image = "https://example.com/images/mars.jpg" }
+                        new Option { Text = "Earth", IsCorrect = false, Image = null },
+                        new Option { Text = "Jupiter", IsCorrect = true, Image = null },
+                        new Option { Text = "Saturn", IsCorrect = false, Image = null },
+                        new Option { Text = "Mars", IsCorrect = false, Image = null }
                     },
                     Tags = new List<string> { "planet", "solar system", "astronomy" },
                     Explanation = "Jupiter is the largest planet in our solar system.",
                     Reference = new Reference { Text = "NASA - Jupiter", Url = "https://example.com/jupiter" },
-                    Image = "https://example.com/images/jupiter_large.jpg",
+                    Image = null,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 },
@@ -86,15 +86,15 @@ namespace MockTestApi.Data
                     Type = "MultipleChoice",
                     Options = new List<Option>
                     {
-                        new Option { Text = "Oxygen", IsCorrect = true, Image = "https://example.com/images/oxygen.jpg" },
-                        new Option { Text = "Gold", IsCorrect = false, Image = "https://example.com/images/gold.jpg" },
-                        new Option { Text = "Osmium", IsCorrect = false, Image = "https://example.com/images/osmium.jpg" },
-                        new Option { Text = "Silver", IsCorrect = false, Image = "https://example.com/images/silver.jpg" }
+                        new Option { Text = "Oxygen", IsCorrect = true, Image = null },
+                        new Option { Text = "Gold", IsCorrect = false, Image = null },
+                        new Option { Text = "Osmium", IsCorrect = false, Image = null },
+                        new Option { Text = "Silver", IsCorrect = false, Image = null }
                     },
                     Tags = new List<string> { "chemistry", "elements", "periodic table" },
                     Explanation = "The chemical symbol 'O' stands for Oxygen.",
                     Reference = new Reference { Text = "Periodic Table", Url = "https://example.com/periodic_table" },
-                    Image = "https://example.com/images/oxygen_element.jpg",
+                    Image = null,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 },
@@ -107,15 +107,15 @@ namespace MockTestApi.Data
                     Type = "MultipleChoice",
                     Options = new List<Option>
                     {
-                        new Option { Text = "Harper Lee", IsCorrect = true, Image = "https://example.com/images/harper_lee.jpg" },
-                        new Option { Text = "Mark Twain", IsCorrect = false, Image = "https://example.com/images/mark_twain.jpg" },
-                        new Option { Text = "J.K. Rowling", IsCorrect = false, Image = "https://example.com/images/jk_rowling.jpg" },
-                        new Option { Text = "Ernest Hemingway", IsCorrect = false, Image = "https://example.com/images/ernest_hemingway.jpg" }
+                        new Option { Text = "Harper Lee", IsCorrect = true, Image = null },
+                        new Option { Text = "Mark Twain", IsCorrect = false, Image = null },
+                        new Option { Text = "J.K. Rowling", IsCorrect = false, Image = null },
+                        new Option { Text = "Ernest Hemingway", IsCorrect = false, Image = null }
                     },
                     Tags = new List<string> { "literature", "books", "authors" },
                     Explanation = "'To Kill a Mockingbird' was written by Harper Lee.",
                     Reference = new Reference { Text = "Harper Lee Biography", Url = "https://example.com/harper_lee" },
-                    Image = "https://example.com/images/to_kill_a_mockingbird.jpg",
+                    Image = null,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 },
@@ -131,7 +131,7 @@ namespace MockTestApi.Data
                     Tags = new List<string> { "geography", "capital cities", "France" },
                     Explanation = "The capital city of France is Paris.",
                     Reference = new Reference { Text = "Capital Cities of Europe", Url = "https://example.com/capital_cities_europe" },
-                    Image = "https://example.com/images/paris.jpg",
+                    Image = null,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 },
@@ -147,11 +147,12 @@ namespace MockTestApi.Data
                     Tags = new List<string> { "geography", "country names", "Japan" },
                     Explanation = "Japan is often referred to as the Land of the Rising Sun.",
                     Reference = new Reference { Text = "Japan Overview", Url = "https://example.com/japan_overview" },
-                    Image = "https://example.com/images/japan.jpg",
+                    Image = null,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 }
             };
+
         }
 
         public static List<Test> GetTests()
@@ -168,9 +169,9 @@ namespace MockTestApi.Data
                     Questions = new List<QuestionAccess>
                     {
                         new QuestionAccess { QuestionId = "g001", Access = "free" },
-                        new QuestionAccess { QuestionId = "c002", Access = "free" },
+                        new QuestionAccess { QuestionId = "c001", Access = "free" },
                         new QuestionAccess { QuestionId = "g002", Access = "free" },
-                        new QuestionAccess { QuestionId = "h002", Access = "free" },
+                        new QuestionAccess { QuestionId = "h001", Access = "free" },
                         new QuestionAccess { QuestionId = "g003", Access = "free" }
                     },
                     Access = "free",

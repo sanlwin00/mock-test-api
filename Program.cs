@@ -145,7 +145,7 @@ builder.Services.AddScoped<IReferenceMaterialService, ReferenceMaterialService>(
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 // Check for wildcard CORS
-bool allowAnyOrigin = allowedOrigins != null && allowedOrigins.Contains("*");
+bool allowAnyOrigin = allowedOrigins == null || allowedOrigins.Contains("*");
 
 builder.Services.AddCors(options =>
 {
@@ -171,6 +171,20 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+/* for debugging
+app.Use(async (context, next) =>
+{
+    // Log the incoming request origin
+    var origin = context.Request.Headers["Origin"];
+    Console.WriteLine($"Request from origin: {origin}");
+
+    await next.Invoke();
+
+    // Log the CORS headers in the response
+    var corsHeaders = context.Response.Headers["Access-Control-Allow-Origin"];
+    Console.WriteLine($"CORS headers: {corsHeaders}");
+});
+*/
 app.UseCors("AllowSpecificOrigins");
 
 //** Moved up to solve 'Anti-Forgery Token was meant for a different claims-based user' issue
