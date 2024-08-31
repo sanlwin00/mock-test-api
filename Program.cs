@@ -75,15 +75,10 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
 {
     var settings = sp.GetRequiredService<IOptions<MyDbSettings>>().Value;
 
-    var username = Environment.GetEnvironmentVariable("MONGO_USERNAME")
-        ?? throw new InvalidOperationException("MONGO_USERNAME environment variable is not set.");
-    var password = Environment.GetEnvironmentVariable("MONGO_PASSWORD")
-        ?? throw new InvalidOperationException("MONGO_PASSWORD environment variable is not set.");
+    var connectionString = Environment.GetEnvironmentVariable("MONGODB_CONNECTION_STRING") ?? settings.ConnectionString;
 
-    var connectionString = settings.ConnectionString
-        .Replace("{USERNAME}", username)
-        .Replace("{PASSWORD}", password);
-
+    if (string.IsNullOrEmpty(connectionString))
+        throw new InvalidOperationException("MONGODB_CONNECTION_STRING environment variable is not set.");
     try
     {
         var client = new MongoClient(connectionString);
@@ -171,7 +166,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-/* for debugging
+
 app.Use(async (context, next) =>
 {
     // Log the incoming request origin
@@ -184,7 +179,7 @@ app.Use(async (context, next) =>
     var corsHeaders = context.Response.Headers["Access-Control-Allow-Origin"];
     Console.WriteLine($"CORS headers: {corsHeaders}");
 });
-*/
+
 app.UseCors("AllowSpecificOrigins");
 
 //** Moved up to solve 'Anti-Forgery Token was meant for a different claims-based user' issue

@@ -27,7 +27,7 @@ namespace MockTestApi.Services
                 CommonButtons = new List<CommonButton>
             {
                 new CommonButton { ButtonText = "Hello!", ButtonPrompt = "Hello!" },
-                new CommonButton { ButtonText = "I need help with PSLE Prep!", ButtonPrompt = "I need help with PSLE Preparation." }
+                new CommonButton { ButtonText = "I need help with the question!", ButtonPrompt = "I need help with PSLE Preparation." }
             }
             };
         }
@@ -53,8 +53,8 @@ namespace MockTestApi.Services
 
         private string CreateSystemPrompt(string context)
         {
-            var basePrompt = "You are a tutor assisting primary six students who are preparing for PSLE exam in Singapore."
-                              + " Answer the topics related to PSLE exam questions such as Math and Science in a simple and concise manner for children to understand. "
+            var basePrompt = "You are a tutor assisting students who are preparing for exam."
+                              + " Answer the topics related to the exam questions such as English, Math and Science in a simple and concise manner for children to understand. "
                               + " If the user asks further questions related to the context, answer them. If it's out of context, say sorry I can't assist you with that.";
 
             if (!string.IsNullOrEmpty(context))

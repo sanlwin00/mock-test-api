@@ -181,7 +181,14 @@ namespace MockTestApi.Services
                             await _userService.UpdateUserAsync(user);
 
                             string validUntil = Utility.ConvertToLocalTime(user.Subscription.EndDate, user.TimeZone).ToShortDateString();
-                            await _emailService.SendThankYouEmailAsync(user.Email, user.DisplayName, validUntil);
+                            try
+                            {
+                                await _emailService.SendThankYouEmailAsync(user.Email, user.DisplayName, validUntil);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error("Failed to send email: {ex}", ex);
+                            }
                         }
                     }
 

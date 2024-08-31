@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using MockTestApi.Data.Interfaces;
 using MockTestApi.Models;
 using MockTestApi.Services.Interfaces;
+using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -95,9 +96,14 @@ namespace MockTestApi.Services
                 }])
             };
             await _userRepository.CreateAsync(user);
-
-            await _emailService.SendWelcomeEmailAsync(user.Email, user.DisplayName);
-
+            try
+            {
+                await _emailService.SendWelcomeEmailAsync(user.Email, user.DisplayName);
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Failed to send email: {ex}", ex);
+            }
             var loginRequest = new LoginRequest { Username = registerDto.Email, Password = registerDto.Password };
             
             return await AuthenticateAsync(loginRequest);
@@ -179,9 +185,14 @@ namespace MockTestApi.Services
 
             var resetLink = $"{passwordResetUrl}?token={token}";
 
-            // Send the email (implement the IEmailSender interface)
-            await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink);
-
+            try
+            {
+                await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink);
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Failed to send email: {ex}", ex);
+            }
             return true;
         }
 
