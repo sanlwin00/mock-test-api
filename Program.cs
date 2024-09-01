@@ -22,8 +22,10 @@ using Serilog;
 using System.Text.Json;
 using Stripe;
 using MongoDB.Bson;
+using Carter;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddCarter();
 
 // Add anti-forgery services
 builder.Services.AddAntiforgery(options =>
@@ -39,6 +41,7 @@ builder.Services.Configure<MailTemplateSettings>(builder.Configuration.GetSectio
 builder.Services.Configure<SmtpSetting>(builder.Configuration.GetSection("Smtp"));
 builder.Services.Configure<OpenApiSetting>(builder.Configuration.GetSection("OpenApi"));
 builder.Services.Configure<MyDbSettings>(builder.Configuration.GetSection("MongoDB"));
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 
 // Configure JWT 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -165,7 +168,7 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
+app.MapCarter();
 
 app.Use(async (context, next) =>
 {

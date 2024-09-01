@@ -1,8 +1,10 @@
-﻿using TimeZoneConverter;
+﻿using System.Security.Cryptography;
+using System.Text;
+using TimeZoneConverter;
 
 namespace MockTestApi.Utils
 {
-    public class Utility
+    public class MyUtility
     {
         public static string GetRandomString(int length)
         {
@@ -21,6 +23,14 @@ namespace MockTestApi.Utils
 
             // Convert UTC to the specified local time zone
             return TimeZoneInfo.ConvertTimeFromUtc(utcNow, timeZone);
+        }
+
+        public static string GetSalt() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
+        public static string GetHash(string text)
+        {
+            using var sha256 = SHA256.Create();
+            return Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(text)));
         }
     }
 }
