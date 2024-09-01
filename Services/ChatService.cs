@@ -43,7 +43,7 @@ namespace MockTestApi.Services
             var requestBody = new
             {
                 model = "gpt-4o-mini", //"gpt-3.5-turbo",
-                temperature = 0.7,
+                temperature = 0.5,
                 messages = messages,
                 max_tokens = 1000
             };
@@ -53,9 +53,7 @@ namespace MockTestApi.Services
 
         private string CreateSystemPrompt(string context)
         {
-            var basePrompt = "You are a tutor assisting students who are preparing for exam."
-                              + " Answer the topics related to the exam questions such as English, Math and Science in a simple and concise manner for children to understand. "
-                              + " If the user asks further questions related to the context, answer them. If it's out of context, say sorry I can't assist you with that.";
+            var basePrompt = _apiSetting.Instruction;
 
             if (!string.IsNullOrEmpty(context))
             {
@@ -78,7 +76,7 @@ namespace MockTestApi.Services
                 content = new object[]
                 {
                     new { type = "text", text = lastPrompt },
-                        imageUrl != null ? new
+                        !string.IsNullOrEmpty(imageUrl) ? new
                         {
                             type = "image_url",
                             image_url = new
@@ -87,7 +85,7 @@ namespace MockTestApi.Services
                                 detail = "high"
                             }
                         } : null
-                }.Where(x => x != null) // Filter out null image values
+                }.Where(x => x != null).ToList() // Filter out null image values
             };
 
             messages.Add(userMessage);

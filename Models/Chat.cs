@@ -6,6 +6,7 @@ namespace MockTestApi.Models
     {
         public string ApiUrl { get; set; }
         public string ApiSecret { get; set; }
+        public string Instruction { get; set; }
     }
     public class ChatRequest
     {
