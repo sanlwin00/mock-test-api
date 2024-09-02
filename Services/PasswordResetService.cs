@@ -44,7 +44,7 @@ namespace MockTestApi.Services
             catch (Exception ex)
             {
                 Log.Error("Failed to send email to {email}: {ex}", email, ex);
-                return false;
+                throw new Exception(ex.Message);
             }
         }
 

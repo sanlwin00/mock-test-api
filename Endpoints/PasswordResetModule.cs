@@ -10,14 +10,20 @@ namespace MockTestApi.Endpoints
         {
             app.MapPost("/auth/request-password-reset", async (PasswordResetRequest passwordResetRequest, IPasswordResetService pwResetService) =>
             {
-                var success = await pwResetService.RequestPasswordResetAsync(passwordResetRequest.Email, passwordResetRequest.PasswordResetUrl);
-                return success ? Results.Ok("Password reset email sent") : Results.NotFound("User not found");
+                return await RequestHandler.HandleRequestAsync(async () =>
+                {
+                    var success = await pwResetService.RequestPasswordResetAsync(passwordResetRequest.Email, passwordResetRequest.PasswordResetUrl);
+                    return success ? Results.Ok("Password reset email sent") : Results.NotFound("User not found");
+                });
             });
 
             app.MapPost("/auth/reset-password", async (PasswordResetDto passwordResetDto, IPasswordResetService pwResetService) =>
             {
-                var success = await pwResetService.ResetPasswordAsync(passwordResetDto.Token, passwordResetDto.Password);
-                return success ? Results.Ok("Password has been reset") : Results.BadRequest("Invalid or expired link. Please request for a new reset link.");
+                return await RequestHandler.HandleRequestAsync(async () =>
+                {
+                    var success = await pwResetService.ResetPasswordAsync(passwordResetDto.Token, passwordResetDto.Password);
+                    return success ? Results.Ok("Password has been reset") : Results.BadRequest("Invalid or expired link. Please request for a new reset link.");
+                });
             });
         }
     }
