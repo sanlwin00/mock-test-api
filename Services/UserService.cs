@@ -16,26 +16,23 @@ namespace MockTestApi.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IPasswordResetTokenRepository _passwordResetRepository;
         private readonly IUserStore _userStore;
-        private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
-        private readonly JwtSettings _jwtSettings;
+        private readonly IAuthenticationService _authenticationService;
 
         public UserService(IUserRepository userRepository,
             IUserStore userStore, 
-            IPasswordResetTokenRepository passwordResetTokenRepository,
             IEmailService emailService,
             IMapper mapper,
-            IOptions<JwtSettings> jwtSettings)
+            IAuthenticationService authenticationService
+            )
         {
             _userRepository = userRepository;
             _userStore = userStore;
             _mapper = mapper;
-            _passwordResetRepository = passwordResetTokenRepository;
             _emailService = emailService;
-            _jwtSettings = jwtSettings.Value;
+            _authenticationService = authenticationService;
         }
 
         public async Task<LoginResponse> RegisterUserAsync(RegisterRequest registerDto)
@@ -44,22 +41,16 @@ namespace MockTestApi.Services
             if (existingUser != null)
                 throw new InvalidOperationException("Email already exists. Please sign in.");
 
-            var user = CreateUser(registerDto);
+            var user = CreateUserObject(registerDto);
 
             await _userRepository.CreateAsync(user);
             await SendWelcomeEmailAsync(user.Email, user.DisplayName);
 
-            return await AuthenticateAsync(new LoginRequest
+            return await _authenticationService.AuthenticateAsync(new LoginRequest
             {
                 Username = registerDto.Email,
                 Password = registerDto.Password
             });
-        }
-
-        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
-        {
-            var users = await _userRepository.GetAllAsync();
-            return _mapper.Map<List<UserDto>>(users);
         }
 
         public Task<User> GetUserByIdAsync(string id) =>
@@ -74,22 +65,13 @@ namespace MockTestApi.Services
             if (user == null)
                 return false;
 
-            UpdateUserFields(user, updateUserDto);
+            SetUserFields(user, updateUserDto);
             return await _userRepository.UpdateAsync(user);
         }
 
-        public Task<bool> DeleteUserAsync(string id) =>
-            _userRepository.DeleteAsync(id);
-
-        public Task CreateUserAsync(User user) =>
-            _userRepository.CreateAsync(user);
-
-        
-
-
-        private User CreateUser(RegisterRequest registerDto)
+        private User CreateUserObject(RegisterRequest registerDto)
         {
-            var salt = GetSalt();
+            var salt = MyUtility.GetSalt();
             return new User
             {
                 Email = registerDto.Email,
@@ -112,7 +94,7 @@ namespace MockTestApi.Services
             };
         }
 
-        private void UpdateUserFields(User user, UpdateUserDto updateUserDto)
+        private void SetUserFields(User user, UpdateUserDto updateUserDto)
         {
             if (!string.IsNullOrEmpty(updateUserDto.DisplayName))
                 user.DisplayName = updateUserDto.DisplayName;

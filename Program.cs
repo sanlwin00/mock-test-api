@@ -49,6 +49,10 @@ var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
 var issuer = jwtSettings["Issuer"];
 var audience = jwtSettings["Audience"];
 
+// Configure Stripe
+Stripe.StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -73,7 +77,8 @@ builder.Services.AddAuthorization(options =>
 });
 
 // Configure MongoDB
-MongoConfig.RegisterConventions();
+MongoUtility.RegisterConventions();
+
 builder.Services.AddSingleton<IMongoDatabase>(sp =>
 {
     var settings = sp.GetRequiredService<IOptions<MyDbSettings>>().Value;
@@ -121,6 +126,8 @@ builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepo
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserStore, MongoUserStore>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<ITestRepository, TestRepository>();
@@ -168,20 +175,8 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
 app.MapCarter();
-
-app.Use(async (context, next) =>
-{
-    // Log the incoming request origin
-    var origin = context.Request.Headers["Origin"];
-    Console.WriteLine($"Request from origin: {origin}");
-
-    await next.Invoke();
-
-    // Log the CORS headers in the response
-    var corsHeaders = context.Response.Headers["Access-Control-Allow-Origin"];
-    Console.WriteLine($"CORS headers: {corsHeaders}");
-});
 
 app.UseCors("AllowSpecificOrigins");
 
@@ -190,6 +185,7 @@ app.UseAuthentication();
 
 // Use anti-forgery middleware
 app.UseAntiforgery();
+
 app.Use(async (context, next) =>
 {
     // Check if the request is for an API endpoint that requires anti-forgery
@@ -215,293 +211,27 @@ app.Use(async (context, next) =>
 
 app.UseAuthorization();
 
-// This is for Stripe API
-Stripe.StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+app.MapGet("/", () => "Hello World!");
 
 // Seed data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    SeedData(services);
+    var database = services.GetRequiredService<IMongoDatabase>();
+
+    MongoUtility.SeedCollection(database, "users", DummyData.GetUsers());
+    MongoUtility.SeedCollection(database, "questions", DummyData.GetQuestions());
+    MongoUtility.SeedCollection(database, "tests", DummyData.GetTests());
+    MongoUtility.SeedCollection(database, "reference_materials", DummyData.GetReferenceMaterials());
+    //MongoUtility.SeedCollection(database, "payments", DummyData.GetPayments());
+    //MongoUtility.SeedCollection(database, "notifications", DummyData.GetNotifications());
+    //MongoUtility.SeedCollection(database, "audit_logs", DummyData.GetAuditLogs());
+    //MongoUtility.SeedCollection(database, "mock_tests", DummyData.GetMockTests());
+    //MongoUtility.SeedCollection(database, "mock_test_histories", DummyData.GetMockTestHistories());
 }
 
-app.MapGet("/chat/config", (IChatService chatService) =>
-{
-    return Results.Ok(chatService.LoadChatBotBaseConfiguration());
-});
-
-app.MapPost("/chat/send", async (ChatRequest chatRequest, IChatService chatService) =>
-{
-    try
-    {
-        var chatResponse = await chatService.GenerateChatResponseAsync(chatRequest.LastPrompt, chatRequest.ConversationHistory, chatRequest.Context, chatRequest.ImageUrl);
-        return Results.Ok(chatResponse);
-    }
-    catch (Exception ex)
-    {
-        Log.Error("Exception occured: {@ex}", ex);
-        var response = new { message = ex.Message };
-        return Results.Json(response, statusCode: 500);
-    }
-});
-
-app.MapPost("/emails/send-contact-form", async ([FromForm] ContactFormRequest request, IEmailService emailService) =>
-{
-    try
-    {
-        await emailService.SendContactFormEmailAsync(
-            request.ToEmail,
-            request.FirstName,
-            request.LastName,
-            request.Phone,
-            request.Message,
-            request.Attachments
-        );
-
-        return Results.Ok("Email sent successfully");
-    }
-    catch (Exception ex)
-    {
-        Log.Error("Exception occured: {@ex}", ex);
-        var response = new { message = ex.Message };
-        return Results.Json(response, statusCode: 500);
-    }
-});
-
-// User endpoints
-//app.MapGet("/users", async (IUserService userService) => await userService.GetAllUsersAsync()).RequireAuthorization("AdminOnly");
-//app.MapGet("/users/{id}", async (IUserService userService, string id) => await userService.GetUserByIdAsync(id)).RequireAuthorization();
-//app.MapPost("/users", async (IUserService userService, User user) => await userService.CreateUserAsync(user));
-//app.MapPut("/users/{id}", async (IUserService userService, User user) => await userService.UpdateUserAsync(user)).RequireAuthorization();
-//app.MapDelete("/users/{id}", async (IUserService userService, string id) => await userService.DeleteUserAsync(id)).RequireAuthorization("AdminOnly");
-app.MapPatch("/users/{id}", async (IUserService userService, UpdateUserDto updateUserDto, string id) =>
-{
-    try
-    {
-        var success = await userService.UpdateUserAsync(id, updateUserDto);
-        if (success)
-        {
-            return Results.NoContent();
-        }
-        return Results.NotFound();
-    }
-    catch (Exception ex)
-    {
-        var response = new { message = ex.Message };
-        return Results.Json(response, statusCode: 500);
-    }
-}).RequireAuthorization();
-
-// Auth endpoints
-app.MapPost("/auth/register", async (IUserService userService, RegisterRequest registerDto) =>
-{
-    try
-    {
-        var loginResponse = await userService.RegisterUserAsync(registerDto);
-
-        if (loginResponse == null)
-            return Results.Unauthorized();
-        else
-        {
-            return Results.Ok(new { loginResponse.Token, loginResponse.User });
-        }
-    }
-    catch (Exception ex)
-    {
-        var response = new { message = ex.Message };
-        return Results.Json(response, statusCode: 500);
-    }
-});
-app.MapPost("/auth/login", async (IUserService userService, LoginRequest loginRequest) =>
-{
-    try
-    {
-        var loginResponse = await userService.AuthenticateAsync(loginRequest);
-
-        if (loginResponse == null)
-            return Results.Unauthorized();
-        else
-        {
-            return Results.Ok(new { loginResponse.Token, loginResponse.User });
-        }
-    }
-    catch (UnauthorizedAccessException ex)
-    {
-        var response = new { message = ex.Message };
-        return Results.Json(response, statusCode: 401);
-    }
-    catch (Exception ex)
-    {
-        var response = new { message = ex.Message };
-        return Results.Json(response, statusCode: 500);
-    }
-});
-app.MapPost("/auth/login/accesscode", async (IUserService userService, AccessCodeRequest accessCodeRequest) =>
-{
-    try
-    {
-        var loginResponse = await userService.AuthenticateWithAccessCodeAsync(accessCodeRequest.AccessCode);
-
-        if (loginResponse == null)
-            throw new UnauthorizedAccessException("Invalid Access Code.");
-        else
-        {
-            return Results.Ok(new { loginResponse.Token, loginResponse.User });
-        }
-    }
-    catch (UnauthorizedAccessException ex)
-    {
-        var response = new { message = ex.Message };
-        return Results.Json(response, statusCode: 401);
-    }
-    catch (Exception ex)
-    {
-        var response = new { message = ex.Message };
-        return Results.Json(response, statusCode: 500);
-    }
-});
-app.MapGet("/auth/profile", async (HttpContext httpContext, IMapper mapper, IUserService userService) => {
-    var userId = httpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-    if (userId == null)
-    {
-        return Results.Unauthorized();
-    }
-
-    var user = await userService.GetUserByIdAsync(userId);   
-    if (user == null)
-    {
-        return Results.NotFound();
-    }
-
-    var userDto = mapper.Map<UserDto>(user);
-    return Results.Ok(userDto);
-}).RequireAuthorization();
-
-app.MapPost("/auth/request-password-reset", async (PasswordResetRequest passwordResetRequest, IUserService userService) =>
-{
-    var success = await userService.RequestPasswordResetAsync(passwordResetRequest.Email, passwordResetRequest.PasswordResetUrl);
-    if (success)
-    {
-        return Results.Ok("Password reset email sent");
-    }
-    return Results.NotFound("User not found");
-});
-
-app.MapPost("/auth/reset-password", async (PasswordResetDto passwordResetDto, IUserService userService) =>
-{
-    var success = await userService.ResetPasswordAsync(passwordResetDto.Token, passwordResetDto.Password);
-    if (success)
-    {
-        return Results.Ok("Password has been reset");
-    }
-    return Results.BadRequest("Invalid or expired link. Please request for a new reset link.");
-});
-
-app.MapGet("/auth/csrf-token", (HttpContext context) =>
-{
-    var tokens = context.RequestServices.GetRequiredService<IAntiforgery>().GetAndStoreTokens(context);
-
-    return Results.Ok(new { token = tokens.RequestToken });
-});
-
-
-
-// Question endpoints
-app.MapGet("/questions", async (IQuestionService questionService) => await questionService.GetAllQuestionsAsync());
-//app.MapGet("/questions/{id}", async (IQuestionService questionService, string id) => await questionService.GetQuestionByIdAsync(id));
-//app.MapPost("/questions", async (IQuestionService questionService, Question question) => await questionService.CreateQuestionAsync(question));
-//app.MapPut("/questions/{id}", async (IQuestionService questionService, Question question) => await questionService.UpdateQuestionAsync(question));
-//app.MapDelete("/questions/{id}", async (IQuestionService questionService, string id) => await questionService.DeleteQuestionAsync(id));
-
-// Test endpoints
-app.MapGet("/tests", async (ITestService testService) => await testService.GetAllTestsAsync());
-//app.MapGet("/tests/{id}", async (ITestService testService, string id) => await testService.GetTestByIdAsync(id));
-//app.MapPost("/tests", async (ITestService testService, Test test) => await testService.CreateTestAsync(test));
-//app.MapPut("/tests/{id}", async (ITestService testService, Test test) => await testService.UpdateTestAsync(test));
-//app.MapDelete("/tests/{id}", async (ITestService testService, string id) => await testService.DeleteTestAsync(id));
-
-// ReferenceMaterial endpoints
-app.MapGet("/references/{id}", async (IReferenceMaterialService referenceMaterialService, string id) => await referenceMaterialService.GetReferenceMaterialByIdAsync(id));
-
-// Payment endpoints
-//app.MapGet("/payments", async (IPaymentService paymentService) => await paymentService.GetAllPaymentsAsync());
-app.MapGet("/payments/validate_session/{sessionId}", async (HttpContext httpContext, IPaymentService paymentService, string sessionId) =>
-{
-    try
-    {
-        var userId = httpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-        if (userId == null)
-        {
-            return Results.Unauthorized();
-        }
-
-        var payment = await paymentService.ValidateSession(sessionId, userId);
-        if (payment == null)
-        {
-            return Results.NotFound("Payment not found or validation failed.");
-        }
-        return Results.Ok(payment);
-    }
-    catch (Exception ex)
-    {
-        var response = new { message = ex.Message };
-        return Results.Json(response, statusCode: 500);
-    }
-}).RequireAuthorization(); ;
-app.MapPost("/payments/create_session", async (HttpContext httpContext, IPaymentService paymentService, StripeRequestDto stripeRequestDto) =>
-{
-    try
-    {
-        var userId = httpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
-        if (userId == null)
-        {
-            return Results.Unauthorized();
-        }
-
-        var result = await paymentService.CreateSession(stripeRequestDto, userId);
-        return Results.Ok(result);
-    }
-    catch (Exception ex)
-    {
-        var response = new { message = ex.Message };
-        return Results.Json(response, statusCode: 500);
-    }
-}).RequireAuthorization();
-
-//app.MapPut("/payments/{id}", async (IPaymentService paymentService, Payment payment) => await paymentService.UpdatePaymentAsync(payment));
-//app.MapDelete("/payments/{id}", async (IPaymentService paymentService, string id) => await paymentService.DeletePaymentAsync(id));
-
-/* Notification endpoints
-app.MapGet("/notifications", async (INotificationService notificationService) => await notificationService.GetAllNotificationsAsync());
-app.MapGet("/notifications/{id}", async (INotificationService notificationService, string id) => await notificationService.GetNotificationByIdAsync(id));
-app.MapPost("/notifications", async (INotificationService notificationService, Notification notification) => await notificationService.CreateNotificationAsync(notification));
-app.MapPut("/notifications/{id}", async (INotificationService notificationService, Notification notification) => await notificationService.UpdateNotificationAsync(notification));
-app.MapDelete("/notifications/{id}", async (INotificationService notificationService, string id) => await notificationService.DeleteNotificationAsync(id));
-
-// AuditLog endpoints
-app.MapGet("/auditlogs", async (IAuditLogService auditLogService) => await auditLogService.GetAllAuditLogsAsync());
-app.MapGet("/auditlogs/{id}", async (IAuditLogService auditLogService, string id) => await auditLogService.GetAuditLogByIdAsync(id));
-app.MapPost("/auditlogs", async (IAuditLogService auditLogService, AuditLog auditLog) => await auditLogService.CreateAuditLogAsync(auditLog));
-app.MapPut("/auditlogs/{id}", async (IAuditLogService auditLogService, AuditLog auditLog) => await auditLogService.UpdateAuditLogAsync(auditLog));
-app.MapDelete("/auditlogs/{id}", async (IAuditLogService auditLogService, string id) => await auditLogService.DeleteAuditLogAsync(id));
-
-// MockTest endpoints
-app.MapGet("/mocktests", async (IMockTestService mockTestService) => await mockTestService.GetAllMockTestsAsync());
-app.MapGet("/mocktests/{id}", async (IMockTestService mockTestService, string id) => await mockTestService.GetMockTestByIdAsync(id));
-app.MapPost("/mocktests", async (IMockTestService mockTestService, MockTest mockTest) => await mockTestService.CreateMockTestAsync(mockTest));
-app.MapPut("/mocktests/{id}", async (IMockTestService mockTestService, MockTest mockTest) => await mockTestService.UpdateMockTestAsync(mockTest));
-app.MapDelete("/mocktests/{id}", async (IMockTestService mockTestService, string id) => await mockTestService.DeleteMockTestAsync(id));
-
-// MockTestHistory endpoints
-app.MapGet("/mocktesthistories", async (IMockTestHistoryService mockTestHistoryService) => await mockTestHistoryService.GetAllMockTestHistoriesAsync());
-app.MapGet("/mocktesthistories/{id}", async (IMockTestHistoryService mockTestHistoryService, string id) => await mockTestHistoryService.GetMockTestHistoryByIdAsync(id));
-app.MapPost("/mocktesthistories", async (IMockTestHistoryService mockTestHistoryService, MockTestHistory mockTestHistory) => await mockTestHistoryService.CreateMockTestHistoryAsync(mockTestHistory));
-app.MapPut("/mocktesthistories/{id}", async (IMockTestHistoryService mockTestHistoryService, MockTestHistory mockTestHistory) => await mockTestHistoryService.UpdateMockTestHistoryAsync(mockTestHistory));
-app.MapDelete("/mocktesthistories/{id}", async (IMockTestHistoryService mockTestHistoryService, string id) => await mockTestHistoryService.DeleteMockTestHistoryAsync(id));
-*/
-app.MapGet("/", () => "Hello World!");
-
 app.Run();
+
 
 void RegisterRepositories(IServiceCollection services)
 {
@@ -557,27 +287,6 @@ void RegisterRepositories(IServiceCollection services)
     });
 }
 
-void SeedData(IServiceProvider services)
-{
-    var database = services.GetRequiredService<IMongoDatabase>();
 
-    SeedCollection(database, "users", DummyData.GetUsers());
-    SeedCollection(database, "questions", DummyData.GetQuestions());
-    SeedCollection(database, "tests", DummyData.GetTests());
-    SeedCollection(database, "reference_materials", DummyData.GetReferenceMaterials());
-    //SeedCollection(database, "payments", DummyData.GetPayments());
-    //SeedCollection(database, "notifications", DummyData.GetNotifications());
-    //SeedCollection(database, "audit_logs", DummyData.GetAuditLogs());
-    //SeedCollection(database, "mock_tests", DummyData.GetMockTests());
-    //SeedCollection(database, "mock_test_histories", DummyData.GetMockTestHistories());
-}
 
-void SeedCollection<T>(IMongoDatabase database, string collectionName, List<T> items) where T : IEntity
-{
-    var collection = database.GetCollection<T>(collectionName);
-    var existingItems = collection.Find(_ => true).ToList();
-    if (!existingItems.Any())
-    {
-        collection.InsertMany(items);
-    }
-}
+

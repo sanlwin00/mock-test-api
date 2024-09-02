@@ -8,7 +8,7 @@ using Serilog;
 
 namespace MockTestApi.Services
 {
-    public class PasswordResetService
+    public class PasswordResetService: IPasswordResetService
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordResetTokenRepository _passwordResetRepository;

@@ -11,14 +11,10 @@ using System.Text;
 
 namespace MockTestApi.Services
 {
-    public class AuthenticationService
+    public class AuthenticationService: IAuthenticationService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IPasswordResetTokenRepository _passwordResetRepository;
         private readonly IUserStore _userStore;
-        private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
-        private readonly IEmailService _emailService;
         private readonly JwtSettings _jwtSettings;
 
         public AuthenticationService(IUserRepository userRepository,
@@ -28,11 +24,8 @@ namespace MockTestApi.Services
             IMapper mapper,
             IOptions<JwtSettings> jwtSettings)
         {
-            _userRepository = userRepository;
             _userStore = userStore;
             _mapper = mapper;
-            _passwordResetRepository = passwordResetTokenRepository;
-            _emailService = emailService;
             _jwtSettings = jwtSettings.Value;
         }
 
