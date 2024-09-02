@@ -2,9 +2,9 @@
 {
     public interface INotificationService
     {
-        Task SendThankYouEmailAsync(string toEmail, string name, string validUntil);
-        Task SendContactFormEmailAsync(string toEmail, string firstName, string lastName, string phone, string message, List<IFormFile>? attachments = null);
-        Task SendPasswordResetEmailAsync(string toEmail, string resetLink);
-        Task SendWelcomeEmailAsync(string toEmail, string name);
+        Task<bool> SendThankYouEmailAsync(string toEmail, string name, string validUntil);
+        Task<bool> SendContactFormEmailAsync(string toEmail, string firstName, string lastName, string phone, string message, List<IFormFile>? attachments = null);
+        Task<bool> SendPasswordResetEmailAsync(string toEmail, string resetLink);
+        Task<bool> SendWelcomeEmailAsync(string toEmail, string name);
     }
 }

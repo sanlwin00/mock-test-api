@@ -24,7 +24,7 @@ namespace MockTestApi.Services
             _transactionalNotificationService = transactionalNotificationService;
         }
 
-        public async Task SendThankYouEmailAsync(string toEmail, string name, string validUntil)
+        public async Task<bool> SendThankYouEmailAsync(string toEmail, string name, string validUntil)
         {
             var template = await LoadTemplateAsync(_templateSettings.ThankYouTemplate);
             var emailBody = template
@@ -34,16 +34,16 @@ namespace MockTestApi.Services
             var emailMessage = new EmailMessage
             {
                 To = toEmail,
-                Subject = $"[{_templateSettings.AppName}] Welcome!",
+                Subject = $"[{_templateSettings.AppName}] Thank you!",
                 Body = emailBody,
                 BodyPlainText = "Thanks for the membership purchase!\r\nYou now have access to over 500 test questions to practice to ensure you pass with confidence.",
                 Bcc = _templateSettings.CcEmail,
             };
 
-            await _transactionalNotificationService.SendEmailAsync(emailMessage);
+            return await _transactionalNotificationService.SendEmailAsync(emailMessage);
         }
 
-        public async Task SendContactFormEmailAsync(string toEmail, string firstName, string lastName, string phone, string message, List<IFormFile>? attachments = null)
+        public async Task<bool> SendContactFormEmailAsync(string toEmail, string firstName, string lastName, string phone, string message, List<IFormFile>? attachments = null)
         {
             var template = await LoadTemplateAsync(_templateSettings.EnquiryTemplate);
             var emailBody = template
@@ -64,10 +64,10 @@ namespace MockTestApi.Services
                 Attachments = attachments
             };
 
-            await _transactionalNotificationService.SendEmailAsync(emailMessage);
+            return await _transactionalNotificationService.SendEmailAsync(emailMessage);
         }
 
-        public async Task SendPasswordResetEmailAsync(string toEmail, string resetLink)
+        public async Task<bool> SendPasswordResetEmailAsync(string toEmail, string resetLink)
         {
             var template = await LoadTemplateAsync(_templateSettings.PasswordResetTemplate);
             var emailBody = template.Replace("{{reset_link}}", resetLink);
@@ -81,10 +81,10 @@ namespace MockTestApi.Services
                 Bcc = _templateSettings.CcEmail,
             };
 
-            await _transactionalNotificationService.SendEmailAsync(emailMessage);
+            return await _transactionalNotificationService.SendEmailAsync(emailMessage);
         }
 
-        public async Task SendWelcomeEmailAsync(string toEmail, string name)
+        public async Task<bool> SendWelcomeEmailAsync(string toEmail, string name)
         {
             var template = await LoadTemplateAsync(_templateSettings.SignUpTemplate);
             var emailBody = template.Replace("{{Name}}", name);
@@ -98,8 +98,7 @@ namespace MockTestApi.Services
                 Bcc = _templateSettings.CcEmail,
             };
 
-
-            await _generalNotificationService.SendEmailAsync(emailMessage);
+            return await _generalNotificationService.SendEmailAsync(emailMessage);
         }
 
         private async Task<string> LoadTemplateAsync(string templateFileName)

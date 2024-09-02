@@ -25,7 +25,7 @@ namespace MockTestApi.Services
             }
             catch (Exception ex)
             {
-                Log.Error("Failed to send email via SendGrid: {ex}", ex);
+                Log.Error("Failed to send email via SendGrid", ex);
                 return false;
             }
         }

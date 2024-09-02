@@ -25,6 +25,7 @@ using MongoDB.Bson;
 using Carter;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddCarter();
 
 // Add anti-forgery services
@@ -221,7 +222,14 @@ builder.Services.AddCors(options =>
         });
 });
 
+//* Configure SeriLog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration).CreateLogger();
+builder.Host.UseSerilog();
+
 var app = builder.Build();
+
+app.UseSerilogRequestLogging(); //* log every request
 
 app.MapCarter();
 

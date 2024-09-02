@@ -23,8 +23,8 @@ namespace MockTestApi.Services
             }
             catch (Exception ex)
             {
-                Log.Error("Failed to send email via SMTP: {ex}", ex);
-                // If SMTP fails, pass the request to the next handler (e.g: SendGrid)
+                Log.Error("Failed to send email via SMTP", ex);
+                // If SMTP fails, pass the request to the next handler
                 return await base.SendEmailAsync(emailMessage);
             }
         }

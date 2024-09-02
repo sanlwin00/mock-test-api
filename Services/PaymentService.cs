@@ -192,8 +192,6 @@ namespace MockTestApi.Services
                         }
                     }
 
-                    
-
                     return _mapper.Map<PaymentDto>(payment);
                 }
                 else

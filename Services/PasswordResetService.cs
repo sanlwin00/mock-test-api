@@ -38,8 +38,7 @@ namespace MockTestApi.Services
 
             try
             {
-                await _emailService.SendPasswordResetEmailAsync(email, resetLink);
-                return true;
+                return await _emailService.SendPasswordResetEmailAsync(email, resetLink);
             }
             catch (Exception ex)
             {
