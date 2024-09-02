@@ -8,4 +8,5 @@ namespace MockTestApi.Models
         public string? Details { get; set; }
         public DateTime? Timestamp { get; set; }
     }
+
 }

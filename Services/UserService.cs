@@ -18,12 +18,12 @@ namespace MockTestApi.Services
         private readonly IUserRepository _userRepository;
         private readonly IUserStore _userStore;
         private readonly IMapper _mapper;
-        private readonly IEmailService _emailService;
+        private readonly INotificationService _emailService;
         private readonly IAuthenticationService _authenticationService;
 
         public UserService(IUserRepository userRepository,
             IUserStore userStore, 
-            IEmailService emailService,
+            INotificationService emailService,
             IMapper mapper,
             IAuthenticationService authenticationService
             )

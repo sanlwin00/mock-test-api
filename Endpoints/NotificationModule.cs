@@ -9,7 +9,7 @@ namespace MockTestApi.Endpoints
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapPost("/emails/send-contact-form", async ([FromForm] ContactFormRequest request, IEmailService emailService) =>
+            app.MapPost("/emails/send-contact-form", async ([FromForm] ContactFormRequest request, INotificationService emailService) =>
             {
                 return await RequestHandler.HandleRequestAsync(async () =>
                 {

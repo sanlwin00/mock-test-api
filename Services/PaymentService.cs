@@ -18,11 +18,11 @@ namespace MockTestApi.Services
         private readonly IPaymentRepository _paymentRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly IEmailService _emailService;
+        private readonly INotificationService _emailService;
         public PaymentService(IPaymentRepository paymentRepository, 
             IMapper mapper, 
             IUserService userService,
-            IEmailService emailService)
+            INotificationService emailService)
         {
             _paymentRepository = paymentRepository;
             _mapper = mapper;

@@ -38,10 +38,15 @@ builder.Services.AddAntiforgery(options =>
 
 // Bind settings from configuration
 builder.Services.Configure<MailTemplateSettings>(builder.Configuration.GetSection("MailTemplateSettings"));
-builder.Services.Configure<SmtpSetting>(builder.Configuration.GetSection("Smtp"));
 builder.Services.Configure<OpenApiSetting>(builder.Configuration.GetSection("OpenApi"));
 builder.Services.Configure<MyDbSettings>(builder.Configuration.GetSection("MongoDB"));
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+// Add Smtp settings
+builder.Services.Configure<SmtpSettings>("Smtp1", builder.Configuration.GetSection("SmtpSettings:Smtp1"));
+builder.Services.Configure<SmtpSettings>("Smtp2", builder.Configuration.GetSection("SmtpSettings:Smtp2"));
+builder.Services.Configure<SmtpSettings>("Smtp3", builder.Configuration.GetSection("SmtpSettings:Smtp3"));
+builder.Services.Configure<EmailApiSettings>(builder.Configuration.GetSection("EmailApi"));
+
 
 // Configure JWT 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -143,10 +148,52 @@ builder.Services.AddScoped<IMockTestService, MockTestService>();
 builder.Services.AddScoped<IMockTestHistoryRepository, MockTestHistoryRepository>();
 builder.Services.AddScoped<IMockTestHistoryService, MockTestHistoryService>();
 builder.Services.AddScoped<IChatService, ChatService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IReferenceMaterialRepository, ReferenceMaterialRepository>();    
 builder.Services.AddScoped<IReferenceMaterialService, ReferenceMaterialService>();
 
+// Register concrete implementations of EmailServiceHandler
+builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
+{
+    var smtp1 = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp1");
+    return new SmtpEmailServiceHandler(Options.Create(smtp1));
+});
+
+builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
+{
+    var smtp2 = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp2");
+    return new SmtpEmailServiceHandler(Options.Create(smtp2));
+});
+
+builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
+{
+    var smtp3 = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp3");
+    return new SmtpEmailServiceHandler(Options.Create(smtp3));
+});
+
+builder.Services.AddTransient<SendGridEmailServiceHandler>();
+
+// Register NotificationService
+builder.Services.AddTransient<INotificationService>(sp =>
+{
+    // Retrieve and chain SMTP handlers for general notifications
+    var smtpHandlers = sp.GetServices<SmtpEmailServiceHandler>().ToList();
+    var smtp1Handler = smtpHandlers[0];
+    var smtp2Handler = smtpHandlers[1];
+    var smtp3Handler = smtpHandlers[2];
+
+    // Set up the SMTP chain for failover
+    smtp1Handler.SetNext(smtp2Handler)
+                .SetNext(smtp3Handler);
+    
+    var sendGridHandler = sp.GetRequiredService<SendGridEmailServiceHandler>();
+    var templateSettings = sp.GetRequiredService<IOptions<MailTemplateSettings>>();
+
+    return new NotificationService(
+        templateSettings,
+        smtp1Handler,
+        sendGridHandler
+    );
+});
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 // Check for wildcard CORS

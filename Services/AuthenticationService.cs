@@ -20,7 +20,7 @@ namespace MockTestApi.Services
         public AuthenticationService(IUserRepository userRepository,
             IUserStore userStore,
             IPasswordResetTokenRepository passwordResetTokenRepository,
-            IEmailService emailService,
+            INotificationService emailService,
             IMapper mapper,
             IOptions<JwtSettings> jwtSettings)
         {

@@ -13,11 +13,11 @@ namespace MockTestApi.Services
         private readonly IUserRepository _userRepository;
         private readonly IPasswordResetTokenRepository _passwordResetRepository;
         private readonly IUserStore _userStore;
-        private readonly IEmailService _emailService;
+        private readonly INotificationService _emailService;
         public PasswordResetService(IUserRepository userRepository,
             IUserStore userStore,
             IPasswordResetTokenRepository passwordResetTokenRepository,
-            IEmailService emailService,
+            INotificationService emailService,
             IUserService userService
             )
         {

@@ -1,12 +1,10 @@
-using MockTestApi.Models;
-namespace MockTestApi.Services.Interfaces
+﻿namespace MockTestApi.Services.Interfaces
 {
     public interface INotificationService
     {
-        Task<IEnumerable<Notification>> GetAllNotificationsAsync();
-        Task<Notification> GetNotificationByIdAsync(string id);
-        Task CreateNotificationAsync(Notification notification);
-        Task<bool> UpdateNotificationAsync(Notification notification);
-        Task<bool> DeleteNotificationAsync(string id);
+        Task SendThankYouEmailAsync(string toEmail, string name, string validUntil);
+        Task SendContactFormEmailAsync(string toEmail, string firstName, string lastName, string phone, string message, List<IFormFile>? attachments = null);
+        Task SendPasswordResetEmailAsync(string toEmail, string resetLink);
+        Task SendWelcomeEmailAsync(string toEmail, string name);
     }
 }
