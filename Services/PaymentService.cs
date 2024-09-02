@@ -175,12 +175,12 @@ namespace MockTestApi.Services
                         if(user != null)
                         {
                             user.Subscription.Plan = "premium";
-                            user.Subscription.AccessCode = Utility.GetRandomString(8);
+                            user.Subscription.AccessCode = MyUtility.GetRandomString(8);
                             user.Subscription.StartDate = DateTime.UtcNow;
                             user.Subscription.EndDate = DateTime.UtcNow.AddDays(30);
                             await _userService.UpdateUserAsync(user);
 
-                            string validUntil = Utility.ConvertToLocalTime(user.Subscription.EndDate, user.TimeZone).ToShortDateString();
+                            string validUntil = MyUtility.ConvertToLocalTime(user.Subscription.EndDate, user.TimeZone).ToShortDateString();
                             try
                             {
                                 await _emailService.SendThankYouEmailAsync(user.Email, user.DisplayName, validUntil);
