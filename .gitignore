@@ -419,7 +419,6 @@ FodyWeavers.xsd
 >>>>>>> 0e86497 (initial commit)
 
 # Ignore all appsettings.json files and their variants
-/appsettings.json
 appsettings.*.json
 appsettings.*.*.json
 *.bak

@@ -12,7 +12,7 @@ RUN dotnet restore
 COPY . .
 
 # Copy and rename appsettings.Docker.json as appsettings.json
-COPY appsettings.Docker.json ./appsettings.json
+COPY appsettings.raventest.json ./appsettings.json
 
 # Build the application
 RUN dotnet publish -c Release -o out
