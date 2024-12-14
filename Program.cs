@@ -197,28 +197,16 @@ builder.Services.AddTransient<INotificationService>(sp =>
 });
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
-// Check for wildcard CORS
-bool allowAnyOrigin = allowedOrigins == null || allowedOrigins.Contains("*");
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigins",
         policy =>
         {
-            if (allowAnyOrigin)
-            {
-                policy.AllowAnyOrigin()
+            policy.WithOrigins(allowedOrigins)
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
-            }
-            else
-            {
-                policy.WithOrigins(allowedOrigins)
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
-            }
         });
 });
 
@@ -265,8 +253,8 @@ app.Use(async (context, next) =>
 
 
 app.UseAuthorization();
-
-app.MapGet("/", () => "Hello World!");
+var version = builder.Configuration.GetValue<string>("ApiVersion");
+app.MapGet("/", () => $"Hello World! v{version}");
 
 // Seed data
 using (var scope = app.Services.CreateScope())
