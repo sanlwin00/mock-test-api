@@ -1,28 +1,19 @@
-using Microsoft.Extensions.Configuration;
+using Carter;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using MockTestApi.Data;
-using MongoDB.Driver;
+using MockTestApi.Data.Interfaces;
+using MockTestApi.Mapping;
 using MockTestApi.Models;
 using MockTestApi.Services;
-using MockTestApi.Data.Interfaces;
 using MockTestApi.Services.Interfaces;
 using MockTestApi.Utils;
-using MockTestApi.Mapping;
-using AutoMapper;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.Net.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Antiforgery;
-using Serilog;
-using System.Text.Json;
-using Stripe;
 using MongoDB.Bson;
-using Carter;
+using MongoDB.Driver;
+using Serilog;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -114,7 +114,7 @@ namespace MockTestApi.Services
             }
             catch (Exception ex)
             {
-                Log.Error("Failed to send welcome email: {ex}", ex);
+                Log.Error(ex, "Failed to send welcome email");
             }
         }
 

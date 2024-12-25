@@ -12,12 +12,12 @@ namespace MockTestApi
             }
             catch (UnauthorizedAccessException ex)
             {
-                Log.Error("Unauthorized", ex);
+                Log.Error(ex, "Unauthorized");
                 return Results.Json(new { message = ex.Message }, statusCode: 401);
             }
             catch (Exception ex)
             {
-                Log.Error("Exception occured", ex);
+                Log.Error(ex, "Exception occured");
                 return Results.Json(new { message = ex.Message }, statusCode: 500);
             }
         }
