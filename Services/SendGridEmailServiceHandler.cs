@@ -8,9 +8,9 @@ namespace MockTestApi.Services
 {
     public class SendGridEmailServiceHandler : EmailServiceHandler
     {
-        private readonly EmailApiSettings _emailApiSettings;
+        private readonly SendGridApiSettings _emailApiSettings;
 
-        public SendGridEmailServiceHandler(IOptions<EmailApiSettings> emailApiSettings)
+        public SendGridEmailServiceHandler(IOptions<SendGridApiSettings> emailApiSettings)
         {
             _emailApiSettings = emailApiSettings.Value;
         }
@@ -69,5 +69,4 @@ namespace MockTestApi.Services
             }
         }
     }
-
 }

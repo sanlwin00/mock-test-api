@@ -37,7 +37,8 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"))
 builder.Services.Configure<SmtpSettings>("Smtp1", builder.Configuration.GetSection("SmtpSettings:Smtp1"));
 builder.Services.Configure<SmtpSettings>("Smtp2", builder.Configuration.GetSection("SmtpSettings:Smtp2"));
 builder.Services.Configure<SmtpSettings>("Smtp3", builder.Configuration.GetSection("SmtpSettings:Smtp3"));
-builder.Services.Configure<EmailApiSettings>(builder.Configuration.GetSection("EmailApi"));
+builder.Services.Configure<SendGridApiSettings>(builder.Configuration.GetSection("EmailApi:SendGrid"));
+builder.Services.Configure<BrevoApiSettings>(builder.Configuration.GetSection("EmailApi:Brevo"));
 
 
 // Configure JWT 
@@ -164,6 +165,16 @@ builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
 
 builder.Services.AddTransient<SendGridEmailServiceHandler>();
 
+builder.Services.AddHttpClient<BrevoEmailServiceHandler>((sp, client) =>
+{
+    var apiSettings = sp.GetRequiredService<IOptionsMonitor<BrevoApiSettings>>().CurrentValue;
+
+    client.BaseAddress = new Uri(apiSettings.BaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30); 
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.DefaultRequestHeaders.Add("api-key", apiSettings.ApiKey); 
+});
+
 // Register NotificationService
 builder.Services.AddTransient<INotificationService>(sp =>
 {
@@ -178,11 +189,12 @@ builder.Services.AddTransient<INotificationService>(sp =>
                 .SetNext(smtp3Handler);
     
     var sendGridHandler = sp.GetRequiredService<SendGridEmailServiceHandler>();
+    var brevoHandler = sp.GetRequiredService<BrevoEmailServiceHandler>();
     var templateSettings = sp.GetRequiredService<IOptions<MailTemplateSettings>>();
 
     return new NotificationService(
         templateSettings,
-        smtp1Handler,
+        brevoHandler,
         sendGridHandler
     );
 });

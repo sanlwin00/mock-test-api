@@ -23,7 +23,7 @@ namespace MockTestApi.Services
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Failed to send email via SMTP - {ex.Message}");
+                Log.Error(ex, $"Failed to send email to { emailMessage.To } via SMTP ({ _smtpSetting.SmtpHost }) - { ex.Message }");
                 // If SMTP fails, pass the request to the next handler
                 return await base.SendEmailAsync(emailMessage);
             }
