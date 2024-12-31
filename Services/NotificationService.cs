@@ -36,7 +36,7 @@ namespace MockTestApi.Services
             {
                 To = toEmail,
                 ToName = toName,
-                Subject = $"[{_templateSettings.AppName}] Thank you!",
+                Subject = $"Thank you for the purchase!",
                 Body = emailBody,
                 BodyPlainText = "Thanks for the membership purchase!\r\nYou now have access to over 500 test questions to practice to ensure you pass with confidence.",
                 Bcc = _templateSettings.CcEmail,
@@ -60,7 +60,7 @@ namespace MockTestApi.Services
             {
                 To = toEmail,
                 ToName = firstName,
-                Subject = $"[{_templateSettings.AppName}] Message received",
+                Subject = $"Message received",
                 Body = emailBody,
                 BodyPlainText = "This email to acknowledge that your message has been received. We will get back to you as soon as we can.",
                 Cc = _templateSettings.CcEmail,
@@ -79,7 +79,7 @@ namespace MockTestApi.Services
             {
                 To = toEmail,
                 ToName = toName,
-                Subject = $"[{_templateSettings.AppName}] Password Reset Link",
+                Subject = $"Password Reset Link",
                 Body = emailBody,
                 BodyPlainText = $"Click the link below to reset the password. Please take note that the link will expire in 24 hours.\r\n{resetLink}",
                 Bcc = _templateSettings.CcEmail,
@@ -97,7 +97,7 @@ namespace MockTestApi.Services
             {
                 To = toEmail,
                 ToName = toName,
-                Subject = $"[{_templateSettings.AppName}] Sign up successful",
+                Subject = $"Sign up successful",
                 Body = emailBody,
                 BodyPlainText = "Nice to have you onboard! Sign in and take the first step towards passing your test with confidence!",
                 Bcc = _templateSettings.CcEmail,
