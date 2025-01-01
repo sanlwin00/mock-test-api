@@ -13,19 +13,18 @@ namespace MockTestApi.Services
         {
             _smtpSetting = smtpSettings.Value;
         }
-        public override async Task<bool> SendEmailAsync(EmailMessage emailMessage)
+        public override async Task SendEmailAsync(EmailMessage emailMessage)
         {
             try
             {
                 // Try to send the email using SMTP
                 await SendViaSmtpAsync(emailMessage);
-                return true;
             }
             catch (Exception ex)
             {
                 Log.Error(ex, $"Failed to send email to { emailMessage.To } via SMTP ({ _smtpSetting.SmtpHost }) - { ex.Message }");
                 // If SMTP fails, pass the request to the next handler
-                return await base.SendEmailAsync(emailMessage);
+                await base.SendEmailAsync(emailMessage);
             }
         }
 

@@ -2,7 +2,7 @@
 {
     public interface IPasswordResetService
     {
-        Task<bool> RequestPasswordResetAsync(string email, string passwordResetUrl);
+        Task RequestPasswordResetAsync(string email, string passwordResetUrl);
         Task<bool> ResetPasswordAsync(string token, string newPassword);
     }
 }

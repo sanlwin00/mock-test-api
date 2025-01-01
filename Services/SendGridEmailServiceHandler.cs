@@ -15,19 +15,9 @@ namespace MockTestApi.Services
             _emailApiSettings = emailApiSettings.Value;
         }
 
-        public override async Task<bool> SendEmailAsync(EmailMessage emailMessage)
+        public override async Task SendEmailAsync(EmailMessage emailMessage)
         {
-            try
-            {
-                // Try to send the email using SendGrid
-                await SendViaSendGridAsync(emailMessage);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to send email via SendGrid");
-                return false;
-            }
+            await SendViaSendGridAsync(emailMessage);           
         }
 
         private async Task SendViaSendGridAsync(EmailMessage emailMessage)

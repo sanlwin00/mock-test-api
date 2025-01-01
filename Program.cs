@@ -1,4 +1,7 @@
 using Carter;
+using Hangfire;
+using Hangfire.Mongo;
+using Hangfire.Mongo.Migration.Strategies;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
@@ -76,13 +79,10 @@ builder.Services.AddAuthorization(options =>
 
 // Configure MongoDB
 MongoUtility.RegisterConventions();
-
+var settings = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<MyDbSettings>>().Value;
+var connectionString = Environment.GetEnvironmentVariable("MONGODB_CONNECTION_STRING") ?? settings.ConnectionString;
 builder.Services.AddSingleton<IMongoDatabase>(sp =>
 {
-    var settings = sp.GetRequiredService<IOptions<MyDbSettings>>().Value;
-
-    var connectionString = Environment.GetEnvironmentVariable("MONGODB_CONNECTION_STRING") ?? settings.ConnectionString;
-
     if (string.IsNullOrEmpty(connectionString))
         throw new InvalidOperationException("MONGODB_CONNECTION_STRING environment variable is not set.");
     try
@@ -113,6 +113,17 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     }
 });
 
+// Add Hangfire services
+//builder.Services.AddHangfire(x => x.UseMongoStorage($"{connectionString}/{settings.DatabaseName}"));
+builder.Services.AddHangfire(x =>
+    x.UseMongoStorage($"{connectionString}/{settings.DatabaseName}", new MongoStorageOptions
+    {
+        MigrationOptions = new MongoMigrationOptions
+        {
+            MigrationStrategy = new DropMongoMigrationStrategy()
+        }
+    }));
+builder.Services.AddHangfireServer();
 
 RegisterRepositories(builder.Services);
 //-------
@@ -194,8 +205,10 @@ builder.Services.AddTransient<INotificationService>(sp =>
 
     return new NotificationService(
         templateSettings,
-        brevoHandler,
-        sendGridHandler
+        generalNotificationService: sp.GetRequiredService<BrevoEmailServiceHandler>(),
+        transactionalNotificationService: sp.GetRequiredService<SendGridEmailServiceHandler>(),
+        notificationRepository: sp.GetRequiredService<INotificationRepository>(),
+        backgroundJobClient: sp.GetRequiredService<IBackgroundJobClient>()
     );
 });
 
@@ -223,6 +236,8 @@ var app = builder.Build();
 app.UseSerilogRequestLogging(); //* log every request
 
 app.MapCarter();
+
+app.UseHangfireDashboard();
 
 app.UseCors("AllowSpecificOrigins");
 
@@ -269,8 +284,8 @@ using (var scope = app.Services.CreateScope())
     MongoUtility.SeedCollection(database, "questions", DummyData.GetQuestions());
     MongoUtility.SeedCollection(database, "tests", DummyData.GetTests());
     MongoUtility.SeedCollection(database, "reference_materials", DummyData.GetReferenceMaterials());
+    MongoUtility.SeedCollection(database, "notifications", DummyData.GetNotifications());
     //MongoUtility.SeedCollection(database, "payments", DummyData.GetPayments());
-    //MongoUtility.SeedCollection(database, "notifications", DummyData.GetNotifications());
     //MongoUtility.SeedCollection(database, "audit_logs", DummyData.GetAuditLogs());
     //MongoUtility.SeedCollection(database, "mock_tests", DummyData.GetMockTests());
     //MongoUtility.SeedCollection(database, "mock_test_histories", DummyData.GetMockTestHistories());

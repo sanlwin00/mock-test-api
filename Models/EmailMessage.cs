@@ -10,6 +10,7 @@
         public List<IFormFile>? Attachments { get; set; } = new List<IFormFile>();
         public string? Cc { get; set; }
         public string? Bcc { get; set; }
+        public bool IsTransactional { get; set; }
     }
 
 }

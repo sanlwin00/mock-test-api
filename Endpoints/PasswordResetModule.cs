@@ -12,8 +12,15 @@ namespace MockTestApi.Endpoints
             {
                 return await RequestHandler.HandleRequestAsync(async () =>
                 {
-                    var success = await pwResetService.RequestPasswordResetAsync(passwordResetRequest.Email, passwordResetRequest.PasswordResetUrl);
-                    return success ? Results.Ok("Password reset email sent") : Results.NotFound("User not found");
+                    try
+                    {
+                        await pwResetService.RequestPasswordResetAsync(passwordResetRequest.Email, passwordResetRequest.PasswordResetUrl);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        return Results.NotFound(ex.Message);
+                    }
+                    return Results.Ok("Password reset email sent");
                 });
             });
 

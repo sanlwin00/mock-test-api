@@ -17,18 +17,9 @@ namespace MockTestApi.Services
             _emailApiSettings = emailApiSettings.Value ?? throw new ArgumentNullException( nameof(emailApiSettings));
         }
 
-        public override async Task<bool> SendEmailAsync(EmailMessage emailMessage)
+        public override async Task SendEmailAsync(EmailMessage emailMessage)
         {
-            try
-            {
-                await SendViaBrevoAsync(emailMessage);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to send email via Brevo");
-                return false;
-            }
+            await SendViaBrevoAsync(emailMessage);
         }
 
         private async Task SendViaBrevoAsync(EmailMessage emailMessage)

@@ -258,12 +258,11 @@ namespace MockTestApi.Data
             {
                 new Notification
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
-                    UserId = ObjectId.GenerateNewId().ToString(),
-                    Type = "email",
-                    Title = "Welcome",
-                    Message = "Welcome to the mock test app!",
-                    Status = "unread",
+                    Id = ObjectId.GenerateNewId().ToString(), 
+                    CreatedAt = DateTime.UtcNow,
+                    Message = new EmailMessage { Body = "Welcome to the mock test app!", Subject="Welcome", To= "email@address.com"},
+                    Status = "Sent",
+                    SentVia = "Brevo",
                     SentAt = DateTime.UtcNow
                 }
             };

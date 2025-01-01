@@ -27,22 +27,22 @@ namespace MockTestApi.Services
             _emailService = emailService;
         }
 
-        public async Task<bool> RequestPasswordResetAsync(string email, string passwordResetUrl)
+        public async Task RequestPasswordResetAsync(string email, string passwordResetUrl)
         {
             var user = await _userStore.GetByUsernameAsync(email);
             if (user == null)
-                return false;
+                throw new ArgumentException("User not found!");
 
             var resetToken = await GeneratePasswordResetTokenAsync(user.Id);
             var resetLink = $"{passwordResetUrl}?token={resetToken.Id}";
 
             try
             {
-                return await _emailService.SendPasswordResetEmailAsync(email, user.DisplayName, resetLink);
+                await _emailService.SendPasswordResetEmailAsync(email, user.DisplayName, resetLink);
             }
             catch (Exception ex)
             {
-                Log.Error("Failed to send email to {email}: {ex}", email, ex);
+                Log.Error(ex, "Failed to send email to {email}: {ex}", email, ex);
                 throw new Exception(ex.Message);
             }
         }

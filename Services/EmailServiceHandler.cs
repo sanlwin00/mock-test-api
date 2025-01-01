@@ -5,7 +5,7 @@ namespace MockTestApi.Services
     public interface IEmailServiceHandler
     {
         IEmailServiceHandler SetNext(IEmailServiceHandler handler);
-        Task<bool> SendEmailAsync(EmailMessage emailMessage);
+        Task SendEmailAsync(EmailMessage emailMessage);
     }
 
     public abstract class EmailServiceHandler : IEmailServiceHandler
@@ -18,14 +18,12 @@ namespace MockTestApi.Services
             return handler;
         }
 
-        public virtual async Task<bool> SendEmailAsync(EmailMessage emailMessage)
+        public virtual async Task SendEmailAsync(EmailMessage emailMessage)
         {
             if (_nextHandler != null)
             {
-                return await _nextHandler.SendEmailAsync(emailMessage);
+                await _nextHandler.SendEmailAsync(emailMessage);
             }
-
-            return false;
         }
     }
 
