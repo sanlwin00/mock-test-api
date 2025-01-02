@@ -116,7 +116,7 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
 // Add Hangfire services
 //builder.Services.AddHangfire(x => x.UseMongoStorage($"{connectionString}/{settings.DatabaseName}"));
 builder.Services.AddHangfire(x =>
-    x.UseMongoStorage($"{connectionString}/{settings.DatabaseName}", new MongoStorageOptions
+    x.UseMongoStorage($"{connectionString}", new MongoStorageOptions
     {
         MigrationOptions = new MongoMigrationOptions
         {
