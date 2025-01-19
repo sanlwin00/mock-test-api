@@ -2,8 +2,9 @@ using MockTestApi.Models;
 
 namespace MockTestApi.Data.Interfaces
 {
-    public interface IAuditLogRepository : IRepository<AuditLog>
+    public interface IAuditLogRepository
     {
-        Task<bool> UpdateAsync(AuditLog auditLog);
+        Task<IEnumerable<AuditLog>> GetAllAsync();
+        Task CreateAsync(AuditLog auditLog);
     }
 }

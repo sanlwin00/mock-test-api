@@ -18,24 +18,9 @@ namespace MockTestApi.Services
             return await _auditLogRepository.GetAllAsync();
         }
 
-        public async Task<AuditLog> GetAuditLogByIdAsync(string id)
-        {
-            return await _auditLogRepository.GetByIdAsync(id);
-        }
-
         public async Task CreateAuditLogAsync(AuditLog auditLog)
         {
             await _auditLogRepository.CreateAsync(auditLog);
-        }
-
-        public async Task<bool> UpdateAuditLogAsync(AuditLog auditLog)
-        {
-            return await _auditLogRepository.UpdateAsync(auditLog);
-        }
-
-        public async Task<bool> DeleteAuditLogAsync(string id)
-        {
-            return await _auditLogRepository.DeleteAsync(id);
         }
     }
 }

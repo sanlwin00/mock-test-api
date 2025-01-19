@@ -1,40 +1,27 @@
 ﻿using MockTestApi.Data.Interfaces;
 using MockTestApi.Models;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace MockTestApi.Data
 {
-    public class ReferenceMaterialRepository: IReferenceMaterialRepository
+    public class ReferenceMaterialRepository : IReferenceMaterialRepository
     {
-        private readonly IRepository<ReferenceMaterial> _repository;
+        private readonly IMongoCollection<ReferenceMaterial> _collection;
 
-        public ReferenceMaterialRepository(IRepository<ReferenceMaterial> repository)
+        public ReferenceMaterialRepository(IMongoDatabase database)
         {
-            _repository = repository;
+            _collection = database.GetCollection<ReferenceMaterial>("reference_materials");
         }
 
-        public Task<IEnumerable<ReferenceMaterial>> GetAllAsync()
+        public async Task<IEnumerable<ReferenceMaterial>> GetAllAsync()
         {
-            return _repository.GetAllAsync();
+            return await _collection.Find(_ => true).ToListAsync();
         }
 
-        public Task<ReferenceMaterial> GetByIdAsync(string id)
+        public async Task<ReferenceMaterial> GetByIdAsync(string id)
         {
-            return _repository.GetByIdAsync(id);
-        }
-
-        public Task CreateAsync(ReferenceMaterial ReferenceMaterial)
-        {
-            return _repository.CreateAsync(ReferenceMaterial);
-        }
-
-        public Task<bool> UpdateAsync(ReferenceMaterial ReferenceMaterial)
-        {
-            return _repository.UpdateAsync(ReferenceMaterial);
-        }
-
-        public Task<bool> DeleteAsync(string id)
-        {
-            return _repository.DeleteAsync(id);
+            return await _collection.Find(r => r.Id == id).FirstOrDefaultAsync();
         }
     }
 }

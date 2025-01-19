@@ -1,30 +1,43 @@
 ﻿using MockTestApi.Data.Interfaces;
 using MockTestApi.Models;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace MockTestApi.Data
 {
     public class PasswordResetTokenRepository : IPasswordResetTokenRepository
     {
-        private readonly IRepository<PasswordResetToken> _repository;
+        private readonly IMongoCollection<PasswordResetToken> _collection;
 
-        public PasswordResetTokenRepository(IRepository<PasswordResetToken> repository)
+        public PasswordResetTokenRepository(IMongoDatabase database)
         {
-            _repository = repository;
+            _collection = database.GetCollection<PasswordResetToken>("password_reset_token");
         }
 
-        public Task<PasswordResetToken> GetByIdAsync(string token)
+        public async Task<PasswordResetToken> GetByIdAsync(string token)
         {
-            return _repository.GetByIdAsync(token);
+            return await _collection.Find(t => t.Id == token).FirstOrDefaultAsync();
         }
 
-        public Task CreateAsync(PasswordResetToken PasswordResetToken)
+        public async Task CreateAsync(PasswordResetToken passwordResetToken)
         {
-            return _repository.CreateAsync(PasswordResetToken);
+            if (passwordResetToken == null)
+            {
+                throw new ArgumentNullException(nameof(passwordResetToken));
+            }
+
+            if (string.IsNullOrEmpty(passwordResetToken.Id))
+            {
+                passwordResetToken.Id = ObjectId.GenerateNewId().ToString();
+            }
+
+            await _collection.InsertOneAsync(passwordResetToken);
         }
 
-        public Task<bool> DeleteAsync(string token)
+        public async Task<bool> DeleteAsync(string token)
         {
-            return _repository.DeleteAsync(token);
+            var result = await _collection.DeleteOneAsync(t => t.Id == token);
+            return result.IsAcknowledged && result.DeletedCount > 0;
         }
     }
 }

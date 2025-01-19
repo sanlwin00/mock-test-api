@@ -1,40 +1,37 @@
 using MockTestApi.Data.Interfaces;
 using MockTestApi.Models;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace MockTestApi.Data
 {
     public class AuditLogRepository : IAuditLogRepository
     {
-        private readonly IRepository<AuditLog> _repository;
+        private readonly IMongoCollection<AuditLog> _collection;
 
-        public AuditLogRepository(IRepository<AuditLog> repository)
+        public AuditLogRepository(IMongoDatabase database)
         {
-            _repository = repository;
+            _collection = database.GetCollection<AuditLog>("audit_logs");
         }
 
-        public Task<IEnumerable<AuditLog>> GetAllAsync()
+        public async Task<IEnumerable<AuditLog>> GetAllAsync()
         {
-            return _repository.GetAllAsync();
+            return await _collection.Find(_ => true).ToListAsync();
         }
 
-        public Task<AuditLog> GetByIdAsync(string id)
+        public async Task CreateAsync(AuditLog auditLog)
         {
-            return _repository.GetByIdAsync(id);
-        }
+            if (auditLog == null)
+            {
+                throw new ArgumentNullException(nameof(auditLog));
+            }
 
-        public Task CreateAsync(AuditLog auditLog)
-        {
-            return _repository.CreateAsync(auditLog);
-        }
+            if (string.IsNullOrEmpty(auditLog.Id))
+            {
+                auditLog.Id = ObjectId.GenerateNewId().ToString();
+            }
 
-        public Task<bool> UpdateAsync(AuditLog auditLog)
-        {
-            return _repository.UpdateAsync(auditLog);
-        }
-
-        public Task<bool> DeleteAsync(string id)
-        {
-            return _repository.DeleteAsync(id);
+            await _collection.InsertOneAsync(auditLog);
         }
     }
 }

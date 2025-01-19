@@ -22,20 +22,5 @@ namespace MockTestApi.Services
         {
             return await _questionRepository.GetByIdAsync(id);
         }
-
-        public async Task CreateQuestionAsync(Question question)
-        {
-            await _questionRepository.CreateAsync(question);
-        }
-
-        public async Task<bool> UpdateQuestionAsync(Question question)
-        {
-            return await _questionRepository.UpdateAsync(question);
-        }
-
-        public async Task<bool> DeleteQuestionAsync(string id)
-        {
-            return await _questionRepository.DeleteAsync(id);
-        }
     }
 }

@@ -4,6 +4,7 @@ using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MockTestApi.Data;
@@ -125,7 +126,6 @@ builder.Services.AddHangfire(x =>
     }));
 builder.Services.AddHangfireServer();
 
-RegisterRepositories(builder.Services);
 //-------
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -133,7 +133,6 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserStore, MongoUserStore>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
@@ -292,61 +291,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
-
-
-void RegisterRepositories(IServiceCollection services)
-{
-    services.AddScoped<IRepository<User>>(sp =>
-    {
-        var database = sp.GetRequiredService<IMongoDatabase>();
-        return new MongoRepository<User>(database, "users");
-    });
-    services.AddScoped<IRepository<Question>>(sp =>
-    {
-        var database = sp.GetRequiredService<IMongoDatabase>();
-        return new MongoRepository<Question>(database, "questions");
-    });
-    services.AddScoped<IRepository<Test>>(sp =>
-    {
-        var database = sp.GetRequiredService<IMongoDatabase>();
-        return new MongoRepository<Test>(database, "tests");
-    });
-    services.AddScoped<IRepository<Payment>>(sp =>
-    {
-        var database = sp.GetRequiredService<IMongoDatabase>();
-        return new MongoRepository<Payment>(database, "payments");
-    });
-    services.AddScoped<IRepository<Notification>>(sp =>
-    {
-        var database = sp.GetRequiredService<IMongoDatabase>();
-        return new MongoRepository<Notification>(database, "notifications");
-    });
-    services.AddScoped<IRepository<AuditLog>>(sp =>
-    {
-        var database = sp.GetRequiredService<IMongoDatabase>();
-        return new MongoRepository<AuditLog>(database, "audit_logs");
-    });
-    services.AddScoped<IRepository<MockTest>>(sp =>
-    {
-        var database = sp.GetRequiredService<IMongoDatabase>();
-        return new MongoRepository<MockTest>(database, "mock_tests");
-    });
-    services.AddScoped<IRepository<MockTestHistory>>(sp =>
-    {
-        var database = sp.GetRequiredService<IMongoDatabase>();
-        return new MongoRepository<MockTestHistory>(database, "mock_test_histories");
-    });
-    services.AddScoped<IRepository<PasswordResetToken>>(sp =>
-    {
-        var database = sp.GetRequiredService<IMongoDatabase>();
-        return new MongoRepository<PasswordResetToken>(database, "password_reset_token");
-    });
-    services.AddScoped<IRepository<ReferenceMaterial>>(sp =>
-    {
-        var database = sp.GetRequiredService<IMongoDatabase>();
-        return new MongoRepository<ReferenceMaterial>(database, "reference_materials");
-    });
-}
 
 
 

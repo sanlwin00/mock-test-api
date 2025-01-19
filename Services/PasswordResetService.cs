@@ -12,24 +12,21 @@ namespace MockTestApi.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordResetTokenRepository _passwordResetRepository;
-        private readonly IUserStore _userStore;
         private readonly INotificationService _emailService;
         public PasswordResetService(IUserRepository userRepository,
-            IUserStore userStore,
             IPasswordResetTokenRepository passwordResetTokenRepository,
             INotificationService emailService,
             IUserService userService
             )
         {
             _userRepository = userRepository;
-            _userStore = userStore;
             _passwordResetRepository = passwordResetTokenRepository;
             _emailService = emailService;
         }
 
         public async Task RequestPasswordResetAsync(string email, string passwordResetUrl)
         {
-            var user = await _userStore.GetByUsernameAsync(email);
+            var user = await _userRepository.GetByUsernameAsync(email);
             if (user == null)
                 throw new ArgumentException("User not found!");
 

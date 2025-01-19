@@ -16,20 +16,17 @@ namespace MockTestApi.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IUserStore _userStore;
         private readonly IMapper _mapper;
         private readonly INotificationService _emailService;
         private readonly IAuthenticationService _authenticationService;
 
         public UserService(IUserRepository userRepository,
-            IUserStore userStore, 
             INotificationService emailService,
             IMapper mapper,
             IAuthenticationService authenticationService
             )
         {
             _userRepository = userRepository;
-            _userStore = userStore;
             _mapper = mapper;
             _emailService = emailService;
             _authenticationService = authenticationService;
@@ -37,7 +34,7 @@ namespace MockTestApi.Services
 
         public async Task<LoginResponse> RegisterUserAsync(RegisterRequest registerDto)
         {
-            var existingUser = await _userStore.GetByUsernameAsync(registerDto.Email);
+            var existingUser = await _userRepository.GetByUsernameAsync(registerDto.Email);
             if (existingUser != null)
                 throw new InvalidOperationException("Email already exists. Please sign in.");
 

@@ -1,42 +1,54 @@
 ﻿using MockTestApi.Data.Interfaces;
 using MockTestApi.Models;
-using SharpCompress.Common;
+
+using MongoDB.Driver;
+using MongoDB.Bson;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MockTestApi.Data
 {
     public class UserRepository : IUserRepository
     {
-        private readonly IRepository<User> _repository;
+        private readonly IMongoCollection<User> _collection;
 
-        public UserRepository(IRepository<User> repository) 
+        public UserRepository(IMongoDatabase database)
         {
-            _repository = repository;
+            _collection = database.GetCollection<User>("users");
+        }
+        public async Task<User> GetByIdAsync(string id)
+        {
+            return await _collection.Find(u => u.Id == id).FirstOrDefaultAsync();
+        }
+        public Task<User> GetByAccessCodeAsync(string accessCode)
+        {
+            return _collection.Find(user => user.Subscription.AccessCode == accessCode).FirstOrDefaultAsync();
         }
 
-        public Task<IEnumerable<User>> GetAllAsync()
+        public Task<User> GetByUsernameAsync(string username)
         {
-            return _repository.GetAllAsync();
+            return _collection.Find(user => user.Email == username).FirstOrDefaultAsync();
+        }
+        public async Task CreateAsync(User user)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (string.IsNullOrEmpty(user.Id))
+            {
+                user.Id = ObjectId.GenerateNewId().ToString();
+            }
+
+            await _collection.InsertOneAsync(user);
         }
 
-        public Task<User> GetByIdAsync(string id)
+        public async Task<bool> UpdateAsync(User user)
         {
-            return _repository.GetByIdAsync(id);
+            var result = await _collection.ReplaceOneAsync(u => u.Id == user.Id, user);
+            return result.IsAcknowledged && result.ModifiedCount > 0;
         }
-
-        public Task CreateAsync(User user)
-        {
-            return _repository.CreateAsync(user);
-        }
-
-        public Task<bool> UpdateAsync(User user)
-        {
-            return _repository.UpdateAsync(user);
-        }
-
-        public Task<bool> DeleteAsync(string id)
-        {
-            return _repository.DeleteAsync(id);
-        }
-
     }
 }
+

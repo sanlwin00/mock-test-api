@@ -13,25 +13,23 @@ namespace MockTestApi.Services
 {
     public class AuthenticationService: IAuthenticationService
     {
-        private readonly IUserStore _userStore;
+        private readonly IUserRepository userRepository;
         private readonly IMapper _mapper;
         private readonly JwtSettings _jwtSettings;
 
         public AuthenticationService(IUserRepository userRepository,
-            IUserStore userStore,
             IPasswordResetTokenRepository passwordResetTokenRepository,
             INotificationService emailService,
             IMapper mapper,
             IOptions<JwtSettings> jwtSettings)
         {
-            _userStore = userStore;
             _mapper = mapper;
             _jwtSettings = jwtSettings.Value;
         }
 
         public async Task<LoginResponse> AuthenticateAsync(LoginRequest loginRequest)
         {
-            var user = await _userStore.GetByUsernameAsync(loginRequest.Username);
+            var user = await userRepository.GetByUsernameAsync(loginRequest.Username);
             if (user == null || !VerifyPassword(user, loginRequest.Password))
                 return null;
 
@@ -40,7 +38,7 @@ namespace MockTestApi.Services
 
         public async Task<LoginResponse> AuthenticateWithAccessCodeAsync(string accessCode)
         {
-            var user = await _userStore.GetByAccessCodeAsync(accessCode);
+            var user = await userRepository.GetByAccessCodeAsync(accessCode);
             return user == null ? null : GenerateLoginResponse(user);
         }
 

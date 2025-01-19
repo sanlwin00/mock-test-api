@@ -1,40 +1,51 @@
 using MockTestApi.Data.Interfaces;
 using MockTestApi.Models;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
-namespace MockTestApi.Data
+public class QuestionRepository : IQuestionRepository
 {
-    public class QuestionRepository : IQuestionRepository
+    private readonly IMongoCollection<Question> _collection;
+
+    public QuestionRepository(IMongoDatabase database)
     {
-        private readonly IRepository<Question> _repository;
+        _collection = database.GetCollection<Question>("questions");
+    }
 
-        public QuestionRepository(IRepository<Question> repository)
+    public async Task<IEnumerable<Question>> GetAllAsync()
+    {
+        return await _collection.Find(_ => true).ToListAsync();
+    }
+
+    public async Task<Question> GetByIdAsync(string id)
+    {
+        return await _collection.Find(q => q.Id == id).FirstOrDefaultAsync();
+    }
+
+    public async Task CreateAsync(Question question)
+    {
+        if (question == null)
         {
-            _repository = repository;
+            throw new ArgumentNullException(nameof(question));
         }
 
-        public Task<IEnumerable<Question>> GetAllAsync()
+        if (string.IsNullOrEmpty(question.Id))
         {
-            return _repository.GetAllAsync();
+            question.Id = ObjectId.GenerateNewId().ToString();
         }
 
-        public Task<Question> GetByIdAsync(string id)
-        {
-            return _repository.GetByIdAsync(id);
-        }
+        await _collection.InsertOneAsync(question);
+    }
 
-        public Task CreateAsync(Question question)
-        {
-            return _repository.CreateAsync(question);
-        }
+    public async Task<bool> UpdateAsync(Question question)
+    {
+        var result = await _collection.ReplaceOneAsync(q => q.Id == question.Id, question);
+        return result.IsAcknowledged && result.ModifiedCount > 0;
+    }
 
-        public Task<bool> UpdateAsync(Question question)
-        {
-            return _repository.UpdateAsync(question);
-        }
-
-        public Task<bool> DeleteAsync(string id)
-        {
-            return _repository.DeleteAsync(id);
-        }
+    public async Task<bool> DeleteAsync(string id)
+    {
+        var result = await _collection.DeleteOneAsync(q => q.Id == id);
+        return result.IsAcknowledged && result.DeletedCount > 0;
     }
 }

@@ -2,8 +2,9 @@
 
 namespace MockTestApi.Data.Interfaces
 {
-    public interface IReferenceMaterialRepository : IRepository<ReferenceMaterial>
+    public interface IReferenceMaterialRepository
     {
-       
+        Task<IEnumerable<ReferenceMaterial>> GetAllAsync();
+        Task<ReferenceMaterial> GetByIdAsync(string id);
     }
 }

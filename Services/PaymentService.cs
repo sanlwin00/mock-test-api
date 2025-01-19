@@ -1,12 +1,8 @@
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using MockTestApi.Data.Interfaces;
 using MockTestApi.Models;
 using MockTestApi.Services.Interfaces;
 using MockTestApi.Utils;
-using MongoDB.Bson.IO;
 using Serilog;
 using Stripe;
 using Stripe.Checkout;
@@ -28,31 +24,6 @@ namespace MockTestApi.Services
             _mapper = mapper;
             _userService = userService;
             _emailService = emailService;
-        }
-
-        public async Task<IEnumerable<Payment>> GetAllPaymentsAsync()
-        {
-            return await _paymentRepository.GetAllAsync();
-        }
-
-        public async Task<Payment> GetPaymentByIdAsync(string id)
-        {
-            return await _paymentRepository.GetByIdAsync(id);
-        }
-
-        public async Task CreatePaymentAsync(Payment payment)
-        {
-            await _paymentRepository.CreateAsync(payment);
-        }
-
-        public async Task<bool> UpdatePaymentAsync(Payment payment)
-        {
-            return await _paymentRepository.UpdateAsync(payment);
-        }
-
-        public async Task<bool> DeletePaymentAsync(string id)
-        {
-            return await _paymentRepository.DeleteAsync(id);
         }
 
         public async Task<StripeRequestDto> CreateSession(StripeRequestDto stripeRequestDto, string userId)

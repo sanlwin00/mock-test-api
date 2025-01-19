@@ -1,40 +1,59 @@
 using MockTestApi.Data.Interfaces;
 using MockTestApi.Models;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace MockTestApi.Data
 {
     public class MockTestHistoryRepository : IMockTestHistoryRepository
     {
-        private readonly IRepository<MockTestHistory> _repository;
+        private readonly IMongoCollection<MockTestHistory> _collection;
 
-        public MockTestHistoryRepository(IRepository<MockTestHistory> repository)
+        public MockTestHistoryRepository(IMongoDatabase database)
         {
-            _repository = repository;
+            _collection = database.GetCollection<MockTestHistory>("mock_test_histories");
         }
 
-        public Task<IEnumerable<MockTestHistory>> GetAllAsync()
+        public async Task<IEnumerable<MockTestHistory>> GetAllAsync()
         {
-            return _repository.GetAllAsync();
+            return await _collection.Find(_ => true).ToListAsync();
         }
 
-        public Task<MockTestHistory> GetByIdAsync(string id)
+        public async Task<MockTestHistory> GetByIdAsync(string id)
         {
-            return _repository.GetByIdAsync(id);
+            return await _collection.Find(mth => mth.Id == id).FirstOrDefaultAsync();
         }
 
-        public Task CreateAsync(MockTestHistory mockTestHistory)
+        public async Task CreateAsync(MockTestHistory mockTestHistory)
         {
-            return _repository.CreateAsync(mockTestHistory);
+            if (mockTestHistory == null)
+            {
+                throw new ArgumentNullException(nameof(mockTestHistory));
+            }
+
+            if (string.IsNullOrEmpty(mockTestHistory.Id))
+            {
+                mockTestHistory.Id = ObjectId.GenerateNewId().ToString();
+            }
+
+            await _collection.InsertOneAsync(mockTestHistory);
         }
 
-        public Task<bool> UpdateAsync(MockTestHistory mockTestHistory)
+        public async Task<bool> UpdateAsync(MockTestHistory mockTestHistory)
         {
-            return _repository.UpdateAsync(mockTestHistory);
+            if (mockTestHistory == null || string.IsNullOrEmpty(mockTestHistory.Id))
+            {
+                throw new ArgumentNullException(nameof(mockTestHistory));
+            }
+
+            var result = await _collection.ReplaceOneAsync(mth => mth.Id == mockTestHistory.Id, mockTestHistory);
+            return result.ModifiedCount > 0;
         }
 
-        public Task<bool> DeleteAsync(string id)
+        public async Task<bool> DeleteAsync(string id)
         {
-            return _repository.DeleteAsync(id);
+            var result = await _collection.DeleteOneAsync(mth => mth.Id == id);
+            return result.DeletedCount > 0;
         }
     }
 }

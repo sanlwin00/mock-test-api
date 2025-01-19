@@ -1,40 +1,43 @@
 using MockTestApi.Data.Interfaces;
 using MockTestApi.Models;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace MockTestApi.Data
 {
     public class NotificationRepository : INotificationRepository
     {
-        private readonly IRepository<Notification> _repository;
+        private readonly IMongoCollection<Notification> _collection;
 
-        public NotificationRepository(IRepository<Notification> repository)
+        public NotificationRepository(IMongoDatabase database)
         {
-            _repository = repository;
+            _collection = database.GetCollection<Notification>("notifications");
         }
 
-        public Task<IEnumerable<Notification>> GetAllAsync()
+        public async Task<Notification> GetByIdAsync(string id)
         {
-            return _repository.GetAllAsync();
+            return await _collection.Find(n => n.Id == id).FirstOrDefaultAsync();
         }
 
-        public Task<Notification> GetByIdAsync(string id)
+        public async Task CreateAsync(Notification notification)
         {
-            return _repository.GetByIdAsync(id);
+            if (notification == null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
+
+            if (string.IsNullOrEmpty(notification.Id))
+            {
+                notification.Id = ObjectId.GenerateNewId().ToString();
+            }
+
+            await _collection.InsertOneAsync(notification);
         }
 
-        public Task CreateAsync(Notification notification)
+        public async Task<bool> UpdateAsync(Notification notification)
         {
-            return _repository.CreateAsync(notification);
-        }
-
-        public Task<bool> UpdateAsync(Notification notification)
-        {
-            return _repository.UpdateAsync(notification);
-        }
-
-        public Task<bool> DeleteAsync(string id)
-        {
-            return _repository.DeleteAsync(id);
+            var result = await _collection.ReplaceOneAsync(n => n.Id == notification.Id, notification);
+            return result.IsAcknowledged && result.ModifiedCount > 0;
         }
     }
 }
