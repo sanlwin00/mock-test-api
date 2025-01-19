@@ -185,8 +185,7 @@ builder.Services.AddHttpClient<BrevoEmailServiceHandler>((sp, client) =>
     client.DefaultRequestHeaders.Add("api-key", apiSettings.ApiKey); 
 });
 
-// Register NotificationService
-builder.Services.AddTransient<INotificationService>(sp =>
+builder.Services.AddScoped<IEmailServiceHandler>(sp =>
 {
     // Retrieve and chain SMTP handlers for general notifications
     var smtpHandlers = sp.GetServices<SmtpEmailServiceHandler>().ToList();
@@ -197,13 +196,13 @@ builder.Services.AddTransient<INotificationService>(sp =>
     // Set up the SMTP chain for failover
     smtp1Handler.SetNext(smtp2Handler)
                 .SetNext(smtp3Handler);
-    
-    var sendGridHandler = sp.GetRequiredService<SendGridEmailServiceHandler>();
-    var brevoHandler = sp.GetRequiredService<BrevoEmailServiceHandler>();
-    var templateSettings = sp.GetRequiredService<IOptions<MailTemplateSettings>>();
-
+    return smtp1Handler;
+});
+// Register NotificationService
+builder.Services.AddTransient<INotificationService>(sp =>
+{   
     return new NotificationService(
-        templateSettings,
+        templateSettings: sp.GetRequiredService<IOptions<MailTemplateSettings>>(),
         generalNotificationService: sp.GetRequiredService<BrevoEmailServiceHandler>(),
         transactionalNotificationService: sp.GetRequiredService<SendGridEmailServiceHandler>(),
         notificationRepository: sp.GetRequiredService<INotificationRepository>(),

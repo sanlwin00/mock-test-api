@@ -47,7 +47,7 @@ namespace MockTestApi.Services
             if (!string.IsNullOrWhiteSpace(emailMessage.Bcc))
                 message.Bcc.Add(emailMessage.Bcc.Trim());
 
-            await AddAttachmentsAsync(message, emailMessage.Attachments);
+            AddAttachments(message, emailMessage.Attachments);
 
             using var smtpClient = new SmtpClient(_smtpSetting.SmtpHost)
             {
@@ -60,21 +60,20 @@ namespace MockTestApi.Services
             await smtpClient.SendMailAsync(message);
             
         }
-
-
-        private async Task AddAttachmentsAsync(MailMessage message, List<IFormFile>? attachments)
+        private void AddAttachments(System.Net.Mail.MailMessage message, List<FileAttachment>? attachments)
         {
             if (attachments == null) return;
 
             foreach (var file in attachments)
             {
-                if (file.Length > 0)
+                if (!string.IsNullOrEmpty(file.Base64Content))
                 {
-                    var memoryStream = new MemoryStream();
-                    await file.CopyToAsync(memoryStream);
-                    memoryStream.Position = 0;
+                    byte[] fileBytes = Convert.FromBase64String(file.Base64Content);
+
+                    var memoryStream = new MemoryStream(fileBytes);
 
                     var attachment = new Attachment(memoryStream, file.FileName, file.ContentType);
+
                     message.Attachments.Add(attachment);
                 }
             }

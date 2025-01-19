@@ -18,18 +18,13 @@ namespace MockTestApi.Services
         }
 
         public override async Task SendEmailAsync(EmailMessage emailMessage)
-        {
-            await SendViaBrevoAsync(emailMessage);
-        }
-
-        private async Task SendViaBrevoAsync(EmailMessage emailMessage)
-        {
+        {            
             var payload = new
             {
                 sender = new
                 {
-                    name = _emailApiSettings.DisplayName, 
-                    email = _emailApiSettings.Email     
+                    name = _emailApiSettings.DisplayName,
+                    email = _emailApiSettings.Email
                 },
                 to = new[]
                 {
@@ -47,7 +42,14 @@ namespace MockTestApi.Services
                     : BuildRecipientArray(emailMessage.Bcc),
                 subject = emailMessage.Subject,
                 htmlContent = emailMessage.Body,
-                textContent = emailMessage.BodyPlainText 
+                textContent = emailMessage.BodyPlainText,
+                attachments = (emailMessage.Attachments != null && emailMessage.Attachments.Count > 0
+                    ? emailMessage.Attachments.Select(a => new
+                    {
+                        content = a.Base64Content,
+                        name = a.FileName
+                    })
+                    : null)
             };
 
             var jsonPayload = JsonConvert.SerializeObject(payload);

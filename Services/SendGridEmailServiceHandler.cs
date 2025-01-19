@@ -3,6 +3,7 @@ using MockTestApi.Models;
 using SendGrid.Helpers.Mail;
 using SendGrid;
 using Serilog;
+using System.Net.Mail;
 
 namespace MockTestApi.Services
 {
@@ -37,26 +38,9 @@ namespace MockTestApi.Services
             if (!string.IsNullOrWhiteSpace(emailMessage.Bcc))
                 message.AddBcc(emailMessage.Bcc.Trim());
 
-            await AddAttachmentsAsync(message, emailMessage.Attachments);
-
+            emailMessage.Attachments?.ForEach(file => message.AddAttachment(file.FileName, file.Base64Content));
+            
             await client.SendEmailAsync(message);
-        }
-
-        private async Task AddAttachmentsAsync(SendGridMessage message, List<IFormFile>? attachments)
-        {
-            if (attachments == null) return;
-
-            foreach (var file in attachments)
-            {
-                if (file.Length > 0)
-                {
-                    var memoryStream = new MemoryStream();
-                    await file.CopyToAsync(memoryStream);
-                    memoryStream.Position = 0;
-
-                    await message.AddAttachmentAsync(file.Name, memoryStream, file.ContentType);
-                }
-            }
         }
     }
 }

@@ -63,9 +63,10 @@ namespace MockTestApi.Services
                 Body = emailBody,
                 BodyPlainText = "This email to acknowledge that your message has been received. We will get back to you as soon as we can.",
                 Cc = _templateSettings.CcEmail,
-                Attachments = attachments,
                 IsTransactional=true
             };
+            if (attachments != null)
+                emailMessage.Attachments = await ProcessAttachmentsAsync(attachments);
 
             await QueueEmailMessageAsync(emailMessage);
         }
@@ -121,6 +122,30 @@ namespace MockTestApi.Services
                .Replace("{{PrivacyPolicyUrl}}", _templateSettings.PrivacyPolicyUrl);
             return templateContent;
         }
+        private async Task<List<FileAttachment>> ProcessAttachmentsAsync(List<IFormFile> formFiles)
+        {
+            var attachments = new List<FileAttachment>();
+
+            foreach (var formFile in formFiles)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await formFile.CopyToAsync(memoryStream);
+                    var base64Content = Convert.ToBase64String(memoryStream.ToArray());
+
+                    attachments.Add(new FileAttachment
+                    {
+                        FileName = formFile.FileName,
+                        ContentType = formFile.ContentType,
+                        FileSize = formFile.Length,
+                        Base64Content = base64Content
+                    });
+                }
+            }
+
+            return attachments;
+        }
+
 
         private async Task QueueEmailMessageAsync(EmailMessage message)
         {
