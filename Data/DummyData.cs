@@ -61,17 +61,17 @@ namespace MockTestApi.Data
                 new Question
                 {
                     Id = "g001",
-                    Text = "What is the largest planet in our solar system?",
+                    Text = new Dictionary<string,string> { { "en", "What is the largest planet in our solar system?" } },
                     Type = "MultipleChoice",
                     Options = new List<Option>
                     {
-                        new Option { Text = "Earth", IsCorrect = false, Image = null },
-                        new Option { Text = "Jupiter", IsCorrect = true, Image = null },
-                        new Option { Text = "Saturn", IsCorrect = false, Image = null },
-                        new Option { Text = "Mars", IsCorrect = false, Image = null }
+                        new Option { Text = new Dictionary<string,string> { { "en", "Earth" } }, IsCorrect = false, Image = null },
+                        new Option { Text = new Dictionary<string,string> { { "en", "Jupiter" } }, IsCorrect = true, Image = null },
+                        new Option { Text = new Dictionary<string,string> { { "en", "Saturn" } }, IsCorrect = false, Image = null },
+                        new Option { Text = new Dictionary<string,string> { { "en", "Mars" } }, IsCorrect = false, Image = null }
                     },
                     Tags = new List<string> { "planet", "solar system", "astronomy" },
-                    Explanation = "Jupiter is the largest planet in our solar system.",
+                    Explanation = new Dictionary<string,string> { { "en","Jupiter is the largest planet in our solar system." } },
                     Reference = new Reference { Text = "NASA - Jupiter", Url = "https://example.com/jupiter" },
                     Image = null,
                     CreatedAt = DateTime.UtcNow,
@@ -82,75 +82,79 @@ namespace MockTestApi.Data
                 new Question
                 {
                     Id = "c001",
-                    Text = "Which element has the chemical symbol 'O'?",
+                    Text = new Dictionary<string, string> { { "en", "Which element has the chemical symbol 'O'?" } },
                     Type = "MultipleChoice",
                     Options = new List<Option>
                     {
-                        new Option { Text = "Oxygen", IsCorrect = true, Image = null },
-                        new Option { Text = "Gold", IsCorrect = false, Image = null },
-                        new Option { Text = "Osmium", IsCorrect = false, Image = null },
-                        new Option { Text = "Silver", IsCorrect = false, Image = null }
+                        new Option { Text = new Dictionary<string, string> { { "en", "Oxygen" } }, IsCorrect = true, Image = null },
+                        new Option { Text = new Dictionary<string, string> { { "en", "Gold" } }, IsCorrect = false, Image = null },
+                        new Option { Text = new Dictionary<string, string> { { "en", "Osmium" } }, IsCorrect = false, Image = null },
+                        new Option { Text = new Dictionary<string, string> { { "en", "Silver" } }, IsCorrect = false, Image = null }
                     },
                     Tags = new List<string> { "chemistry", "elements", "periodic table" },
-                    Explanation = "The chemical symbol 'O' stands for Oxygen.",
+                    Explanation = new Dictionary<string, string> { { "en", "The chemical symbol 'O' stands for Oxygen." } },
                     Reference = new Reference { Text = "Periodic Table", Url = "https://example.com/periodic_table" },
                     Image = null,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 },
 
+
                 // Multiple Choice Question 3
                 new Question
                 {
                     Id = "h001",
-                    Text = "Who wrote 'To Kill a Mockingbird'?",
+                    Text = new Dictionary<string, string> { { "en", "Who wrote 'To Kill a Mockingbird'?" } },
                     Type = "MultipleChoice",
                     Options = new List<Option>
                     {
-                        new Option { Text = "Harper Lee", IsCorrect = true, Image = null },
-                        new Option { Text = "Mark Twain", IsCorrect = false, Image = null },
-                        new Option { Text = "J.K. Rowling", IsCorrect = false, Image = null },
-                        new Option { Text = "Ernest Hemingway", IsCorrect = false, Image = null }
+                        new Option { Text = new Dictionary<string, string> { { "en", "Harper Lee" } }, IsCorrect = true, Image = null },
+                        new Option { Text = new Dictionary<string, string> { { "en", "Mark Twain" } }, IsCorrect = false, Image = null },
+                        new Option { Text = new Dictionary<string, string> { { "en", "J.K. Rowling" } }, IsCorrect = false, Image = null },
+                        new Option { Text = new Dictionary<string, string> { { "en", "Ernest Hemingway" } }, IsCorrect = false, Image = null }
                     },
                     Tags = new List<string> { "literature", "books", "authors" },
-                    Explanation = "'To Kill a Mockingbird' was written by Harper Lee.",
+                    Explanation = new Dictionary<string, string> { { "en", "'To Kill a Mockingbird' was written by Harper Lee." } },
                     Reference = new Reference { Text = "Harper Lee Biography", Url = "https://example.com/harper_lee" },
                     Image = null,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 },
 
+
                 // Free Text Question 1
                 new Question
                 {
                     Id = "g002",
-                    Text = "What is the capital of France?",
+                    Text = new Dictionary<string, string> { { "en", "What is the capital of France?" } },
                     Type = "FreeText",
                     Options = new List<Option>(), // No options needed for free-text questions
                     CorrectAnswer = "Paris",
                     Tags = new List<string> { "geography", "capital cities", "France" },
-                    Explanation = "The capital city of France is Paris.",
+                    Explanation = new Dictionary<string, string> { { "en", "The capital city of France is Paris." } },
                     Reference = new Reference { Text = "Capital Cities of Europe", Url = "https://example.com/capital_cities_europe" },
                     Image = null,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 },
 
+
                 // Free Text Question 2
                 new Question
                 {
                     Id = "g003",
-                    Text = "Which country is known as the Land of the Rising Sun?",
+                    Text = new Dictionary<string, string> { { "en", "Which country is known as the Land of the Rising Sun?" } },
                     Type = "FreeText",
                     Options = new List<Option>(), // No options needed for free-text questions
                     CorrectAnswer = "Japan",
                     Tags = new List<string> { "geography", "country names", "Japan" },
-                    Explanation = "Japan is often referred to as the Land of the Rising Sun.",
+                    Explanation = new Dictionary<string, string> { { "en", "Japan is often referred to as the Land of the Rising Sun." } },
                     Reference = new Reference { Text = "Japan Overview", Url = "https://example.com/japan_overview" },
                     Image = null,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 }
+
             };
 
         }

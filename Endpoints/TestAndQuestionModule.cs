@@ -17,6 +17,14 @@ namespace MockTestApi.Endpoints
                 });
             });
 
+            app.MapGet("/questions/{locale}", async (IQuestionService questionService, string locale) =>
+            {
+                return await RequestHandler.HandleRequestAsync(async () =>
+                {
+                    return Results.Ok(await questionService.GetAllQuestionsAsync(locale));
+                });
+            });
+
             // Test endpoints
             app.MapGet("/tests", async (ITestService testService) =>
             {
