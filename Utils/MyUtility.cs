@@ -6,6 +6,26 @@ namespace MockTestApi.Utils
 {
     public class MyUtility
     {
+        public static object RemoveSensitiveProperties(object obj, params string[] propertiesToRemove)
+        {
+            if (obj == null) return null;
+
+            var objType = obj.GetType();
+            var properties = objType.GetProperties();
+
+            var sanitizedDict = new Dictionary<string, object>();
+
+            foreach (var prop in properties)
+            {
+                if (!propertiesToRemove.Contains(prop.Name))
+                {
+                    sanitizedDict[prop.Name] = prop.GetValue(obj);
+                }
+            }
+
+            return sanitizedDict;
+        }
+
         public static string GetRandomString(int length)
         {
             Random rnd = new Random();

@@ -131,6 +131,9 @@ builder.Services.AddHangfireServer();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor(); 
+builder.Services.AddScoped<IAuditLogFactory, AuditLogFactory>();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -145,7 +148,6 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
-builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<IMockTestService, MockTestService>();
 builder.Services.AddScoped<IMockTestHistoryRepository, MockTestHistoryRepository>();
