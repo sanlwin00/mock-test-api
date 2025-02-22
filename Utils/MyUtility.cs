@@ -26,6 +26,26 @@ namespace MockTestApi.Utils
             return sanitizedDict;
         }
 
+        public static object KeepTheseProperties(object obj, params string[] propertiesToKeep)
+        {
+            if (obj == null) return null;
+
+            var objType = obj.GetType();
+            var properties = objType.GetProperties();
+
+            var filteredDict = new Dictionary<string, object>();
+
+            foreach (var prop in properties)
+            {
+                if (propertiesToKeep.Contains(prop.Name))
+                {
+                    filteredDict[prop.Name] = prop.GetValue(obj);
+                }
+            }
+
+            return filteredDict;
+        }
+
         public static string GetRandomString(int length)
         {
             Random rnd = new Random();

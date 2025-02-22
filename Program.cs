@@ -188,7 +188,6 @@ void RegisterRepositories(IServiceCollection services)
     services.AddScoped<IMockTestHistoryRepository, MockTestHistoryRepository>();
     services.AddScoped<IReferenceMaterialRepository, ReferenceMaterialRepository>();
     services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
-    services.AddScoped<IAuditLogFactory, AuditLogFactory>();
     services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 }
 

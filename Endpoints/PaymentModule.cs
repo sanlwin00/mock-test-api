@@ -1,6 +1,8 @@
 ﻿using Carter;
 using MockTestApi.Models;
 using MockTestApi.Services.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace MockTestApi.Endpoints
 {
@@ -11,8 +13,8 @@ namespace MockTestApi.Endpoints
             app.MapGet("/payments/validate_session/{sessionId}", async (HttpContext httpContext, IPaymentService paymentService, string sessionId) =>
             {
                 return await RequestHandler.HandleRequestAsync(async () =>
-                {
-                    var userId = httpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+                {                    
+                    var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                     if (userId is null)
                         return Results.Unauthorized();
 
@@ -28,8 +30,8 @@ namespace MockTestApi.Endpoints
             app.MapPost("/payments/create_session", async (HttpContext httpContext, IPaymentService paymentService, StripeRequestDto stripeRequestDto) =>
             {
                 return await RequestHandler.HandleRequestAsync(async () =>
-                {
-                    var userId = httpContext.User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+                {                    
+                    var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                     if (userId == null)
                         return Results.Unauthorized();
 
