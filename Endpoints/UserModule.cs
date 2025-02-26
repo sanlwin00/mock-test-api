@@ -26,7 +26,7 @@ namespace MockTestApi.Endpoints
 
                     var userDto = mapper.Map<UserDto>(user);
 
-                    await auditLogService.CreateAuditLogAsync("Read", "User", userId);
+                    await auditLogService.CreateAuditLogAsync("Fetch", "User", userId);
 
                     return Results.Ok(userDto);
                 });
