@@ -9,5 +9,7 @@ namespace MockTestApi.Data.Interfaces
         Task CreateAsync(MockTest mockTest);
         Task<bool> UpdateAsync(MockTest mockTest);
         Task<bool> DeleteAsync(string id);
+        Task<bool> UpdateProgressAsync(string id, string questionId, string answer, int? selectedOption);
+        Task<bool> CompleteTestAsync(string id, MockTestResults completeMockTestDto);
     }
 }

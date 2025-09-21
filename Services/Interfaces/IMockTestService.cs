@@ -5,8 +5,8 @@ namespace MockTestApi.Services.Interfaces
     {
         Task<IEnumerable<MockTest>> GetAllMockTestsAsync();
         Task<MockTest> GetMockTestByIdAsync(string id);
-        Task CreateMockTestAsync(MockTest mockTest);
-        Task<bool> UpdateMockTestAsync(MockTest mockTest);
-        Task<bool> DeleteMockTestAsync(string id);
+        Task<MockTest> CreateAsync(MockTest mockTestDto);
+        Task<bool> UpdateProgressAsync(string id, UpdateMockTestDto updateMockTestDto);
+        Task<bool> CompleteTestAsync(string id, CompleteMockTestDto completeMockTestDto);
     }
 }

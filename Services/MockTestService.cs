@@ -1,6 +1,7 @@
 using MockTestApi.Data.Interfaces;
 using MockTestApi.Models;
 using MockTestApi.Services.Interfaces;
+using MongoDB.Bson;
 
 namespace MockTestApi.Services
 {
@@ -13,29 +14,37 @@ namespace MockTestApi.Services
             _mockTestRepository = mockTestRepository;
         }
 
-        public async Task<IEnumerable<MockTest>> GetAllMockTestsAsync()
-        {
-            return await _mockTestRepository.GetAllAsync();
-        }
-
-        public async Task<MockTest> GetMockTestByIdAsync(string id)
-        {
-            return await _mockTestRepository.GetByIdAsync(id);
-        }
-
-        public async Task CreateMockTestAsync(MockTest mockTest)
+        public async Task<MockTest> CreateAsync(MockTest mockTest)
         {
             await _mockTestRepository.CreateAsync(mockTest);
+            return mockTest;
         }
 
-        public async Task<bool> UpdateMockTestAsync(MockTest mockTest)
+        public async Task<bool> UpdateProgressAsync(string id, UpdateMockTestDto updateMockTestDto)
         {
-            return await _mockTestRepository.UpdateAsync(mockTest);
+            var mockTest = await _mockTestRepository.GetByIdAsync(id);
+            if (mockTest == null) return false;
+
+            var question = mockTest.Questions.FirstOrDefault(q => q.QuestionId == updateMockTestDto.QuestionId);
+            if (question == null) return false;
+
+            return await _mockTestRepository.UpdateProgressAsync(id, updateMockTestDto.QuestionId, updateMockTestDto.UserAnswer, updateMockTestDto.SelectedOption);
         }
 
-        public async Task<bool> DeleteMockTestAsync(string id)
+        public async Task<bool> CompleteTestAsync(string id, MockTestResults completeMockTestDto)
         {
-            return await _mockTestRepository.DeleteAsync(id);
+            var mockTest = await _mockTestRepository.GetByIdAsync(id);
+            if (mockTest == null) return false;
+
+            return await _mockTestRepository.CompleteTestAsync(id, completeMockTestDto);
         }
+
+
+        public Task<IEnumerable<MockTest>> GetAllMockTestsAsync() => 
+            _mockTestRepository.GetAllAsync();
+
+        public Task<MockTest> GetMockTestByIdAsync(string id) => 
+            _mockTestRepository.GetByIdAsync(id);
     }
+
 }

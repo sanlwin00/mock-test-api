@@ -27,16 +27,42 @@ namespace MockTestApi.Data
         public async Task CreateAsync(MockTest mockTest)
         {
             if (mockTest == null)
-            {
                 throw new ArgumentNullException(nameof(mockTest));
-            }
 
-            if (string.IsNullOrEmpty(mockTest.Id))
-            {
-                mockTest.Id = ObjectId.GenerateNewId().ToString();
-            }
-
+            mockTest.Id ??= ObjectId.GenerateNewId().ToString();
             await _collection.InsertOneAsync(mockTest);
+        }
+        public async Task<bool> UpdateProgressAsync(string id, string questionId, string answer, int? selectedOption)
+        {
+            var update = Builders<MockTest>.Update
+                .Set("Questions.$[q].UserAnswer", answer)
+                .Set("Questions.$[q].SelectedOption", selectedOption)
+                .Set("UpdatedAt", DateTime.UtcNow);
+
+            var arrayFilters = new List<ArrayFilterDefinition>
+            {
+                new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("q.Id", questionId))
+            };
+
+            var result = await _collection.UpdateOneAsync(
+                Builders<MockTest>.Filter.Eq(mt => mt.Id, id),
+                update,
+                new UpdateOptions { ArrayFilters = arrayFilters });
+
+            return result.ModifiedCount > 0;
+        }
+        public async Task<bool> CompleteTestAsync(string mockTestId, MockTestResults completeMockTestDto)
+        {
+            var update = Builders<MockTest>.Update
+                .Set(mt => mt.Results, completeMockTestDto)
+                .Set(mt => mt.UpdatedAt, DateTime.UtcNow);
+
+            var result = await _collection.UpdateOneAsync(
+                Builders<MockTest>.Filter.Eq(mt => mt.Id, mockTestId),
+                update
+            );
+
+            return result.ModifiedCount > 0;
         }
 
         public async Task<bool> UpdateAsync(MockTest mockTest)
