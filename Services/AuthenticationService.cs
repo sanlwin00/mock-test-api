@@ -26,6 +26,17 @@ namespace MockTestApi.Services
             _mapper = mapper;
             _jwtSettings = jwtSettings.Value;
             _userRepository = userRepository;
+
+            // Validate JWT settings
+            if (jwtSettings?.Value == null)
+                throw new ArgumentNullException(nameof(jwtSettings));
+
+            if (string.IsNullOrWhiteSpace(jwtSettings.Value.Key) || jwtSettings.Value.Key.Length < 16)
+                throw new ArgumentException("JWT Key must be at least 16 characters");
+
+            if (jwtSettings.Value.ExpireDays < 0)
+                throw new ArgumentOutOfRangeException(nameof(jwtSettings.Value.ExpireDays), "ExpireDays cannot be negative");
+
         }
 
         public async Task<LoginResponse> AuthenticateAsync(LoginRequest loginRequest)
@@ -55,10 +66,17 @@ namespace MockTestApi.Services
 
         private string GenerateJwtToken(User user)
         {
+            // Validate essential user properties
+            if (string.IsNullOrWhiteSpace(user.Id))
+                throw new ArgumentException("User ID cannot be null or empty", nameof(user.Id));
+
+            if (string.IsNullOrWhiteSpace(user.Email))
+                throw new ArgumentException("User email cannot be null or empty", nameof(user.Email));
+
             // Define standard claims
             var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
@@ -72,7 +90,9 @@ namespace MockTestApi.Services
             // Create the token with a signing key
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddDays(_jwtSettings.ExpireDays);
+            var expires = _jwtSettings.ExpireDays == 0
+                ? DateTime.UtcNow  // Immediate expiry for zero days
+                : DateTime.UtcNow.AddDays(_jwtSettings.ExpireDays);
 
             var token = new JwtSecurityToken(
                 _jwtSettings.Issuer,
