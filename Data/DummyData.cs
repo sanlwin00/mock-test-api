@@ -299,8 +299,8 @@ namespace MockTestApi.Data
                     TestId = ObjectId.GenerateNewId().ToString(),
                     Questions = new List<MockTestQuestion>
                     {
-                        new MockTestQuestion { QuestionId = ObjectId.GenerateNewId().ToString(), SelectedOption = "Paris" },
-                        new MockTestQuestion { QuestionId = ObjectId.GenerateNewId().ToString(), SelectedOption = "Berlin" }
+                        new MockTestQuestion { QuestionId = ObjectId.GenerateNewId().ToString(), SelectedOption = 1 },
+                        new MockTestQuestion { QuestionId = ObjectId.GenerateNewId().ToString(), SelectedOption = 2 }
                     },
                     Results = new MockTestResults
                     {

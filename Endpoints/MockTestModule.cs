@@ -48,7 +48,7 @@ namespace MockTestApi.Endpoints
                 });
             });
 
-            app.MapPatch("/mock-tests/complete/{id}", async (string id, MockTestResults completeMockTestDto, IMockTestService mockTestService, IAuditLogService auditLogService) =>
+            app.MapPut("/mock-tests/complete/{id}", async (string id, CompleteMockTestDto completeMockTestDto, IMockTestService mockTestService, IAuditLogService auditLogService) =>
             {
                 return await RequestHandler.HandleRequestAsync(async () =>
                 {

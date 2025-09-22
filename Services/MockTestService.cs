@@ -23,20 +23,30 @@ namespace MockTestApi.Services
         public async Task<bool> UpdateProgressAsync(string id, UpdateMockTestDto updateMockTestDto)
         {
             var mockTest = await _mockTestRepository.GetByIdAsync(id);
-            if (mockTest == null) return false;
+            if (mockTest == null)
+            {
+                Console.WriteLine($"MockTest not found for id: {id}");
+                return false;
+            }
 
             var question = mockTest.Questions.FirstOrDefault(q => q.QuestionId == updateMockTestDto.QuestionId);
-            if (question == null) return false;
+            if (question == null)
+            {
+                Console.WriteLine($"Question not found for questionId: {updateMockTestDto.QuestionId}");
+                return false;
+            }
 
-            return await _mockTestRepository.UpdateProgressAsync(id, updateMockTestDto.QuestionId, updateMockTestDto.UserAnswer, updateMockTestDto.SelectedOption);
+            Console.WriteLine($"Updating progress - ID: {id}, QuestionId: {updateMockTestDto.QuestionId}, SelectedOption: {updateMockTestDto.SelectedOption}, UserAnswer: {updateMockTestDto.UserAnswer}, ReviewLater: {updateMockTestDto.ReviewLater}");
+
+            return await _mockTestRepository.UpdateProgressAsync(id, updateMockTestDto.QuestionId, updateMockTestDto.UserAnswer, updateMockTestDto.SelectedOption, updateMockTestDto.ReviewLater);
         }
 
-        public async Task<bool> CompleteTestAsync(string id, MockTestResults completeMockTestDto)
+        public async Task<bool> CompleteTestAsync(string id, CompleteMockTestDto completeMockTestDto)
         {
             var mockTest = await _mockTestRepository.GetByIdAsync(id);
             if (mockTest == null) return false;
 
-            return await _mockTestRepository.CompleteTestAsync(id, completeMockTestDto);
+            return await _mockTestRepository.CompleteTestAsync(id, completeMockTestDto.Results);
         }
 
 

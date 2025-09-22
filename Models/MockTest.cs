@@ -40,9 +40,15 @@ namespace MockTestApi.Models
     public class UpdateMockTestDto
     {
         public string QuestionId { get; set; }
-        public int SelectedOption { get; set; }
+        public int? SelectedOption { get; set; }
         public string UserAnswer { get; set; }
         public bool ReviewLater { get; set; }
-    }    
+    }
+
+    public class CompleteMockTestDto
+    {
+        public List<MockTestQuestion> Questions { get; set; }
+        public MockTestResults Results { get; set; }
+    }
 
 }

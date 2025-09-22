@@ -32,29 +32,39 @@ namespace MockTestApi.Data
             mockTest.Id ??= ObjectId.GenerateNewId().ToString();
             await _collection.InsertOneAsync(mockTest);
         }
-        public async Task<bool> UpdateProgressAsync(string id, string questionId, string answer, int? selectedOption)
+        public async Task<bool> UpdateProgressAsync(string id, string questionId, string answer, int? selectedOption, bool reviewLater)
         {
-            var update = Builders<MockTest>.Update
-                .Set("Questions.$[q].UserAnswer", answer)
-                .Set("Questions.$[q].SelectedOption", selectedOption)
-                .Set("UpdatedAt", DateTime.UtcNow);
+            var updateBuilder = Builders<MockTest>.Update
+                .Set("questions.$[q].userAnswer", answer ?? "")
+                .Set("questions.$[q].reviewLater", reviewLater)
+                .Set("updatedAt", DateTime.UtcNow);
+
+            // Handle SelectedOption properly - set to null or the actual value
+            if (selectedOption.HasValue)
+            {
+                updateBuilder = updateBuilder.Set("questions.$[q].selectedOption", selectedOption.Value);
+            }
+            else
+            {
+                updateBuilder = updateBuilder.Set("questions.$[q].selectedOption", BsonNull.Value);
+            }
 
             var arrayFilters = new List<ArrayFilterDefinition>
             {
-                new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("q.Id", questionId))
+                new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("q.questionId", questionId))
             };
 
             var result = await _collection.UpdateOneAsync(
                 Builders<MockTest>.Filter.Eq(mt => mt.Id, id),
-                update,
+                updateBuilder,
                 new UpdateOptions { ArrayFilters = arrayFilters });
 
             return result.ModifiedCount > 0;
         }
-        public async Task<bool> CompleteTestAsync(string mockTestId, MockTestResults completeMockTestDto)
+        public async Task<bool> CompleteTestAsync(string mockTestId, MockTestResults mockTestResults)
         {
             var update = Builders<MockTest>.Update
-                .Set(mt => mt.Results, completeMockTestDto)
+                .Set(mt => mt.Results, mockTestResults)
                 .Set(mt => mt.UpdatedAt, DateTime.UtcNow);
 
             var result = await _collection.UpdateOneAsync(

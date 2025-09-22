@@ -35,8 +35,8 @@ namespace MockTestApi.Services
         public async Task<ChatResponse> GenerateChatResponseAsync(
             string lastPrompt,
             List<ChatMessage> conversationHistory,
-            string context = null,
-            string imageUrl = null)
+            string? context = null,
+            string? imageUrl = null)
         {
             var messages = CreateMessages(lastPrompt, imageUrl, context);
 
