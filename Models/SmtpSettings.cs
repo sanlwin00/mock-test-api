@@ -14,6 +14,7 @@
         public int SmtpPort { get; set; }
 
         public bool EnableSsl { get; set; }
+        public bool IsActive { get; set; }
 
     }
 }

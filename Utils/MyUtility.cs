@@ -70,7 +70,10 @@ namespace MockTestApi.Utils
         public static string GetHash(string text)
         {
             using var sha256 = SHA256.Create();
-            return Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(text)));
+            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(text));
+
+            return string.Concat(hashedBytes.Select(b => b.ToString("x2")));
         }
+
     }
 }

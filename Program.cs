@@ -207,24 +207,40 @@ void RegisterServices(IServiceCollection services)
 }
 
 void RegisterNotificationServices(IServiceCollection services)
-{    
-    builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
-    {
-        var smtp1 = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp1");
-        return new SmtpEmailServiceHandler(Options.Create(smtp1));
-    });
+{
+    var serviceProvider = builder.Services.BuildServiceProvider();
+    var smtpHandlers = new List<SmtpEmailServiceHandler>();
 
-    builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
+    // Check and register SMTP handlers only if they are active
+    var smtp1Settings = builder.Configuration.GetSection("SmtpSettings:Smtp1").Get<SmtpSettings>();
+    if (smtp1Settings?.IsActive == true)
     {
-        var smtp2 = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp2");
-        return new SmtpEmailServiceHandler(Options.Create(smtp2));
-    });
+     builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
+   {
+     var smtp1 = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp1");
+            return new SmtpEmailServiceHandler(Options.Create(smtp1));
+      });
+    }
 
-    builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
+    var smtp2Settings = builder.Configuration.GetSection("SmtpSettings:Smtp2").Get<SmtpSettings>();
+    if (smtp2Settings?.IsActive == true)
     {
-        var smtp3 = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp3");
-        return new SmtpEmailServiceHandler(Options.Create(smtp3));
-    });
+   builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
+        {
+      var smtp2 = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp2");
+  return new SmtpEmailServiceHandler(Options.Create(smtp2));
+        });
+    }
+
+ var smtp3Settings = builder.Configuration.GetSection("SmtpSettings:Smtp3").Get<SmtpSettings>();
+    if (smtp3Settings?.IsActive == true)
+    {
+        builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
+        {
+    var smtp3 = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp3");
+  return new SmtpEmailServiceHandler(Options.Create(smtp3));
+        });
+ }
 
     builder.Services.AddTransient<SendGridEmailServiceHandler>();
 
@@ -240,27 +256,33 @@ void RegisterNotificationServices(IServiceCollection services)
 
     builder.Services.AddScoped<IEmailServiceHandler>(sp =>
     {
-        // Retrieve and chain SMTP handlers for general notifications
+        // Retrieve active SMTP handlers for general notifications
         var smtpHandlers = sp.GetServices<SmtpEmailServiceHandler>().ToList();
-        var smtp1Handler = smtpHandlers[0];
-        var smtp2Handler = smtpHandlers[1];
-        var smtp3Handler = smtpHandlers[2];
+
+        if (smtpHandlers.Count == 0)
+        {
+            // If no SMTP handlers are active, return null or a default handler
+            return null;
+        }
 
         // Set up the SMTP chain for failover
-        smtp1Handler.SetNext(smtp2Handler)
-                    .SetNext(smtp3Handler);
-        return smtp1Handler;
+        for (int i = 0; i < smtpHandlers.Count - 1; i++)
+        {
+            smtpHandlers[i].SetNext(smtpHandlers[i + 1]);
+        }
+
+        return smtpHandlers[0];
     });
     
     builder.Services.AddTransient<INotificationService>(sp =>
     {
         return new NotificationService(
             templateSettings: sp.GetRequiredService<IOptions<MailTemplateSettings>>(),
-            generalNotificationService: sp.GetRequiredService<BrevoEmailServiceHandler>(),
+     generalNotificationService: sp.GetRequiredService<BrevoEmailServiceHandler>(),
             transactionalNotificationService: sp.GetRequiredService<SendGridEmailServiceHandler>(),
-            notificationRepository: sp.GetRequiredService<INotificationRepository>(),
+     notificationRepository: sp.GetRequiredService<INotificationRepository>(),
             backgroundJobClient: sp.GetRequiredService<IBackgroundJobClient>()
-        );
+    );
     });
 }
 
