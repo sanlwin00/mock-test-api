@@ -42,7 +42,17 @@ namespace MockTestApi.Services
         public async Task<LoginResponse> AuthenticateAsync(LoginRequest loginRequest)
         {
             var user = await _userRepository.GetByUsernameAsync(loginRequest.Username);
-            if (user == null || !VerifyPassword(user, loginRequest.Password))
+            if (user == null)
+                return null;
+
+            // Validate user properties before password verification
+            if (string.IsNullOrWhiteSpace(user.Id))
+                throw new ArgumentException("User ID cannot be null or empty", nameof(user.Id));
+
+            if (string.IsNullOrWhiteSpace(user.Email))
+                throw new ArgumentException("User email cannot be null or empty", nameof(user.Email));
+
+            if (!VerifyPassword(user, loginRequest.Password))
                 return null;
 
             return GenerateLoginResponse(user);
