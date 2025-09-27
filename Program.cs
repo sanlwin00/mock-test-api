@@ -208,81 +208,61 @@ void RegisterServices(IServiceCollection services)
 
 void RegisterNotificationServices(IServiceCollection services)
 {
-    var serviceProvider = builder.Services.BuildServiceProvider();
-    var smtpHandlers = new List<SmtpEmailServiceHandler>();
+    // Register email service configurations
+    builder.Services.Configure<SendGridApiSettings>(builder.Configuration.GetSection("EmailApi:SendGrid"));
+    builder.Services.Configure<BrevoApiSettings>(builder.Configuration.GetSection("EmailApi:Brevo"));
 
-    // Check and register SMTP handlers only if they are active
-    var smtp1Settings = builder.Configuration.GetSection("SmtpSettings:Smtp1").Get<SmtpSettings>();
-    if (smtp1Settings?.IsActive == true)
-    {
-     builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
-   {
-     var smtp1 = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp1");
-            return new SmtpEmailServiceHandler(Options.Create(smtp1));
-      });
-    }
-
-    var smtp2Settings = builder.Configuration.GetSection("SmtpSettings:Smtp2").Get<SmtpSettings>();
-    if (smtp2Settings?.IsActive == true)
-    {
-   builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
-        {
-      var smtp2 = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp2");
-  return new SmtpEmailServiceHandler(Options.Create(smtp2));
-        });
-    }
-
- var smtp3Settings = builder.Configuration.GetSection("SmtpSettings:Smtp3").Get<SmtpSettings>();
-    if (smtp3Settings?.IsActive == true)
-    {
-        builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
-        {
-    var smtp3 = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp3");
-  return new SmtpEmailServiceHandler(Options.Create(smtp3));
-        });
- }
-
+    // Register concrete email service implementations
     builder.Services.AddTransient<SendGridEmailServiceHandler>();
-
     builder.Services.AddHttpClient<BrevoEmailServiceHandler>((sp, client) =>
     {
         var apiSettings = sp.GetRequiredService<IOptionsMonitor<BrevoApiSettings>>().CurrentValue;
-
         client.BaseAddress = new Uri(apiSettings.BaseUrl);
         client.Timeout = TimeSpan.FromSeconds(30);
         client.DefaultRequestHeaders.Add("Accept", "application/json");
         client.DefaultRequestHeaders.Add("api-key", apiSettings.ApiKey);
     });
 
+    // Register SMTP email service handlers
+    builder.Services.AddTransient<SmtpEmailServiceHandler>(sp =>
+    {
+        var smtp2Settings = sp.GetRequiredService<IOptionsSnapshot<SmtpSettings>>().Get("Smtp2");
+        return new SmtpEmailServiceHandler(Options.Create(smtp2Settings));
+    });
+
+    // Register the transactional and general email service providers
     builder.Services.AddScoped<IEmailServiceHandler>(sp =>
     {
-        // Retrieve active SMTP handlers for general notifications
-        var smtpHandlers = sp.GetServices<SmtpEmailServiceHandler>().ToList();
+        var transactionalProvider = builder.Configuration.GetValue<string>("EmailProvider:Transactional")?.ToLower() ?? "brevo";
+        var generalProvider = builder.Configuration.GetValue<string>("EmailProvider:General")?.ToLower() ?? "smtp";
 
-        if (smtpHandlers.Count == 0)
+        var transactionalService = transactionalProvider switch
         {
-            // If no SMTP handlers are active, return null or a default handler
-            return null;
-        }
+            "sendgrid" => (IEmailServiceHandler)sp.GetRequiredService<SendGridEmailServiceHandler>(),
+            "brevo" => (IEmailServiceHandler)sp.GetRequiredService<BrevoEmailServiceHandler>(),
+            "smtp" => sp.GetServices<SmtpEmailServiceHandler>().First(),
+            _ => throw new InvalidOperationException($"Unsupported transactional email provider: {transactionalProvider}")
+        };
 
-        // Set up the SMTP chain for failover
-        for (int i = 0; i < smtpHandlers.Count - 1; i++)
+        var generalService = generalProvider switch
         {
-            smtpHandlers[i].SetNext(smtpHandlers[i + 1]);
-        }
+            "sendgrid" => (IEmailServiceHandler)sp.GetRequiredService<SendGridEmailServiceHandler>(),
+            "brevo" => (IEmailServiceHandler)sp.GetRequiredService<BrevoEmailServiceHandler>(),
+            "smtp" => sp.GetServices<SmtpEmailServiceHandler>().First(),
+            _ => throw new InvalidOperationException($"Unsupported general email provider: {generalProvider}")
+        };
 
-        return smtpHandlers[0];
+        // Add a property or method to distinguish between transactional and general emails
+        return new CompositeEmailServiceHandler(transactionalService, generalService);
     });
     
     builder.Services.AddTransient<INotificationService>(sp =>
     {
         return new NotificationService(
-            templateSettings: sp.GetRequiredService<IOptions<MailTemplateSettings>>(),
-     generalNotificationService: sp.GetRequiredService<BrevoEmailServiceHandler>(),
-            transactionalNotificationService: sp.GetRequiredService<SendGridEmailServiceHandler>(),
-     notificationRepository: sp.GetRequiredService<INotificationRepository>(),
-            backgroundJobClient: sp.GetRequiredService<IBackgroundJobClient>()
-    );
+             templateSettings: sp.GetRequiredService<IOptions<MailTemplateSettings>>(),
+             emailServiceHandler: sp.GetRequiredService<IEmailServiceHandler>(),
+             notificationRepository: sp.GetRequiredService<INotificationRepository>()
+        );
     });
 }
 

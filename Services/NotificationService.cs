@@ -11,17 +11,13 @@ namespace MockTestApi.Services
     /// </summary>
     public class NotificationService(
             IOptions<MailTemplateSettings> templateSettings,
-            BrevoEmailServiceHandler generalNotificationService,
-            SendGridEmailServiceHandler transactionalNotificationService,
-            INotificationRepository notificationRepository,
-            IBackgroundJobClient backgroundJobClient
+            IEmailServiceHandler emailServiceHandler,
+            INotificationRepository notificationRepository
         ) : INotificationService
     {
         private readonly MailTemplateSettings _templateSettings = templateSettings.Value;
-        private readonly BrevoEmailServiceHandler _generalNotificationService = generalNotificationService;
-        private readonly SendGridEmailServiceHandler _transactionalNotificationService = transactionalNotificationService;
+        private readonly IEmailServiceHandler _emailServiceHandler = emailServiceHandler;
         private readonly INotificationRepository _notificationRepository = notificationRepository;
-        private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
 
         public async Task SendThankYouEmailAsync(string toEmail, string toName, string validUntil)
         {
@@ -168,10 +164,10 @@ namespace MockTestApi.Services
             var notification = await _notificationRepository.GetByIdAsync(notificationId);
             if (notification == null)
                 throw new InvalidOperationException($"Notification with ID {notificationId} not found.");
-            // Choose the correct email service
-            IEmailServiceHandler emailService = notification.Message.IsTransactional
-                ? _transactionalNotificationService
-                : _generalNotificationService;
+            
+             // Use Brevo for both general and transactional emails
+            IEmailServiceHandler emailService = _emailServiceHandler;
+            
             try
             {
                 await emailService.SendEmailAsync(notification.Message);
