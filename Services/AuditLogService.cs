@@ -68,5 +68,10 @@ namespace MockTestApi.Services
 
             await _auditLogRepository.CreateAsync(auditLog);
         }
+
+        public async Task<MockTestUserCount> GetMockTestUserCountAsync()
+        {
+            return await _auditLogRepository.GetMockTestStartedEventCountAsync();
+        }
     }
 }

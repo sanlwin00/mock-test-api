@@ -6,5 +6,6 @@ namespace MockTestApi.Data.Interfaces
     {
         Task<IEnumerable<AuditLog>> GetAllAsync();
         Task CreateAsync(AuditLog auditLog);
+        Task<MockTestUserCount> GetMockTestStartedEventCountAsync();
     }
 }

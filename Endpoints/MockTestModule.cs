@@ -59,6 +59,15 @@ namespace MockTestApi.Endpoints
                     return Results.NoContent();
                 });
             });
+
+            app.MapGet("/mock-tests/user-count", async (IAuditLogService auditLogService) =>
+            {
+                return await RequestHandler.HandleRequestAsync(async () =>
+                {
+                    MockTestUserCount result = await auditLogService.GetMockTestUserCountAsync();
+                    return Results.Ok(result.TotalCount);
+                });
+            });
         }
     }
 
