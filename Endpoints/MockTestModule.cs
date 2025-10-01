@@ -64,8 +64,8 @@ namespace MockTestApi.Endpoints
             {
                 return await RequestHandler.HandleRequestAsync(async () =>
                 {
-                    MockTestUserCount result = await auditLogService.GetMockTestUserCountAsync();
-                    return Results.Ok(result.TotalCount);
+                    var result = await auditLogService.GetMockTestUserCountAsync();
+                    return Results.Ok(result);
                 });
             });
         }
