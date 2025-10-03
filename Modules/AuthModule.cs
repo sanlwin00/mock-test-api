@@ -35,7 +35,6 @@ namespace MockTestApi.Modules
                     var loginResponse = await authService.AuthenticateAsync(loginRequest);
                     var userId = loginResponse?.User?.Id ?? "Unknown";
 
-                    var sanitizedLoginRequest = MyUtility.RemoveSensitiveProperties(loginRequest, "Password");
                     await auditLogService.CreateAuditLogAsync("Login", "User", userId, userName: loginRequest.Username, isSuccess: loginResponse != null);
 
                     return loginResponse == null

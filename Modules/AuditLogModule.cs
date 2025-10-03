@@ -14,7 +14,7 @@ namespace MockTestApi.Modules
                     var result = await auditLogService.GetAuditLogsAsync(pageNumber, pageSize, searchKeyword);
                     return Results.Ok(result);
                 });
-            });
+            }).RequireAuthorization("AdminOnly");
         }
     }
 }
