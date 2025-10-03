@@ -2,7 +2,7 @@
 using MockTestApi.Models;
 using MockTestApi.Services.Interfaces;
 
-namespace MockTestApi.Endpoints
+namespace MockTestApi.Modules
 {
     public class PasswordResetModule : ICarterModule
     {

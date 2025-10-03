@@ -7,7 +7,7 @@ using MockTestApi.Utils;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace MockTestApi.Endpoints
+namespace MockTestApi.Modules
 {
     public class UserModule : ICarterModule
     {

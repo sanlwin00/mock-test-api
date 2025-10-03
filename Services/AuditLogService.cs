@@ -73,5 +73,10 @@ namespace MockTestApi.Services
         {
             return await _auditLogRepository.GetMockTestStartedEventCountAsync();
         }
+
+        public async Task<PagedResult<AuditLog>> GetAuditLogsAsync(int pageNumber, int pageSize, string? searchKeyword = null)
+        {
+            return await _auditLogRepository.GetAuditLogsAsync(pageNumber, pageSize, searchKeyword);
+        }
     }
 }

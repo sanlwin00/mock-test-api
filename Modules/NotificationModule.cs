@@ -4,7 +4,7 @@ using MockTestApi.Models;
 using MockTestApi.Services;
 using MockTestApi.Services.Interfaces;
 
-namespace MockTestApi.Endpoints
+namespace MockTestApi.Modules
 {
     public class NotificationModule : ICarterModule
     {

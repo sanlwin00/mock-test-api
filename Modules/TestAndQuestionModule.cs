@@ -1,7 +1,7 @@
 ﻿using Carter;
 using MockTestApi.Services.Interfaces;
 
-namespace MockTestApi.Endpoints
+namespace MockTestApi.Modules
 {
     public class TestAndQuestionModule : ICarterModule
     {

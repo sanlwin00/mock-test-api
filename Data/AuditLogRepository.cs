@@ -117,5 +117,44 @@ namespace MockTestApi.Data
                 KnownUserCount = doc.GetValue("knownUser_count", 0).AsInt32
             };
         }
+
+        public async Task<PagedResult<AuditLog>> GetAuditLogsAsync(int pageNumber, int pageSize, string? searchKeyword = null)
+        {
+            var filterBuilder = Builders<AuditLog>.Filter;
+            var filter = filterBuilder.Empty;
+
+            if (!string.IsNullOrWhiteSpace(searchKeyword))
+            {
+                var searchFilters = new List<FilterDefinition<AuditLog>>
+                {
+                    filterBuilder.Regex(x => x.UserName, new BsonRegularExpression(searchKeyword, "i")),
+                    filterBuilder.Regex(x => x.Action, new BsonRegularExpression(searchKeyword, "i")),
+                    filterBuilder.Regex(x => x.EntityType, new BsonRegularExpression(searchKeyword, "i")),
+                    filterBuilder.Regex(x => x.EntityId, new BsonRegularExpression(searchKeyword, "i")),
+                    filterBuilder.Regex(x => x.Details, new BsonRegularExpression(searchKeyword, "i")),
+                    filterBuilder.Regex(x => x.IPAddress, new BsonRegularExpression(searchKeyword, "i"))
+                };
+
+                filter = filterBuilder.Or(searchFilters);
+            }
+
+            var totalCount = await _collection.CountDocumentsAsync(filter);
+            var skip = (pageNumber - 1) * pageSize;
+
+            var auditLogs = await _collection
+                .Find(filter)
+                .Sort(Builders<AuditLog>.Sort.Descending(x => x.Timestamp))
+                .Skip(skip)
+                .Limit(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<AuditLog>
+            {
+                Items = auditLogs,
+                TotalCount = (int)totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
     }
 }

@@ -6,7 +6,7 @@ using MockTestApi.Services;
 using MockTestApi.Services.Interfaces;
 using MockTestApi.Utils;
 
-namespace MockTestApi.Endpoints
+namespace MockTestApi.Modules
 {
     public class AuthModule : ICarterModule
     {
