@@ -16,7 +16,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'
+          dotnet-version: '8.0.x'
 
       - name: Generate appsettings.citizenshiptest.uat.json
         env:
@@ -132,7 +132,7 @@ jobs:
       - name: Restore & Publish
         run: |
           dotnet restore MockTestApi.csproj
-          dotnet publish MockTestApi.csproj -c Release -o ./publish
+          dotnet publish MockTestApi.csproj -c Release -o ./publish --self-contained true -r win-x64
 
       - name: Set ASPNETCORE_ENVIRONMENT in web.config
         run: |
@@ -144,7 +144,7 @@ jobs:
                 <handlers>
                   <add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" />
                 </handlers>
-                <aspNetCore processPath="dotnet" arguments=".\MockTestApi.dll" stdoutLogEnabled="true" stdoutLogFile=".\logs\stdout" hostingModel="OutOfProcess">
+                <aspNetCore processPath=".\MockTestApi.exe" arguments="" stdoutLogEnabled="true" stdoutLogFile=".\logs\stdout" hostingModel="OutOfProcess">
                   <environmentVariables>
                     <environmentVariable name="ASPNETCORE_ENVIRONMENT" value="citizenshiptest.uat" />
                   </environmentVariables>
