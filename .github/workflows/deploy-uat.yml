@@ -157,6 +157,7 @@ jobs:
       - name: Take app offline
         run: |
           lftp -c "set ftp:ssl-allow false; open -u $FTP_USER,$FTP_PASS ftp://$FTP_SERVER; put app_offline.htm -o app_offline.htm"
+          sleep 5
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.UAT_FTP_USERNAME }}
