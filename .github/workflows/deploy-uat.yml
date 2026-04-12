@@ -1,0 +1,165 @@
+name: Deploy UAT (CitizenshipTest)
+
+on:
+  push:
+    branches: [uat]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: uat
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Generate appsettings.citizenshiptest.uat.json
+        env:
+          MONGODB_CS: ${{ secrets.UAT_MONGO_CONNECTION_STR }}
+          OPENAI_KEY: ${{ secrets.UAT_OPENAI_API_KEY }}
+          OPENAI_INSTRUCTION: "You are a tutor assisting candidates in preparing for their canadian citizenship test. Below is a sample question from the test. Review the question and its options, then provide help based on the student's query. Your responses should be simple, clear, and memorable to aid the users in understanding and retaining the method to answer correctly. If the user asks about topics not related to the question, politely inform them that you are here to help only with the canada citizenship test questions."
+          JWT_KEY: ${{ secrets.UAT_JWT_KEY }}
+          BREVO_SMTP_PWD: ${{ secrets.UAT_BREVO_SMTP_PASSWORD }}
+          SMTP2_PWD: ${{ secrets.UAT_SMTP2_PASSWORD }}
+          SENDGRID_SMTP_PWD: ${{ secrets.UAT_SENDGRID_SMTP_PASSWORD }}
+          SENDGRID_API: ${{ secrets.UAT_SENDGRID_API_KEY }}
+          BREVO_API: ${{ secrets.UAT_BREVO_API_KEY }}
+          STRIPE_KEY: ${{ secrets.UAT_STRIPE_SECRET_KEY }}
+          FRONTEND_URL: https://citizenship-app-uat.ravenapps.site
+        run: |
+          jq -n \
+            --arg mongodb_cs "$MONGODB_CS" \
+            --arg openai_key "$OPENAI_KEY" \
+            --arg openai_instruction "$OPENAI_INSTRUCTION" \
+            --arg jwt_key "$JWT_KEY" \
+            --arg brevo_smtp_pwd "$BREVO_SMTP_PWD" \
+            --arg smtp2_pwd "$SMTP2_PWD" \
+            --arg sendgrid_smtp_pwd "$SENDGRID_SMTP_PWD" \
+            --arg sendgrid_api "$SENDGRID_API" \
+            --arg brevo_api "$BREVO_API" \
+            --arg stripe_key "$STRIPE_KEY" \
+            --arg frontend_url "$FRONTEND_URL" \
+            '{
+              "AllowedOrigins": [$frontend_url, "http://localhost:3001"],
+              "MongoDB": {
+                "ConnectionString": $mongodb_cs,
+                "DatabaseName": "citizenshipdb"
+              },
+              "OpenApi": {
+                "ApiUrl": "https://api.openai.com/v1/chat/completions",
+                "ApiSecret": $openai_key,
+                "Instruction": $openai_instruction
+              },
+              "Jwt": {
+                "Key": $jwt_key,
+                "Issuer": "MockTestApi",
+                "Audience": "MockTestApp",
+                "ExpireDays": "30"
+              },
+              "SmtpSettings": {
+                "Smtp1": {
+                  "IsActive": false,
+                  "Email": "support@ccacademy.ca",
+                  "DisplayName": "Citizenship Academy",
+                  "SmtpHost": "smtp-relay.brevo.com",
+                  "SmtpPort": 587,
+                  "Username": "7b439c001@smtp-brevo.com",
+                  "Password": $brevo_smtp_pwd,
+                  "EnableSsl": true
+                },
+                "Smtp2": {
+                  "IsActive": true,
+                  "Email": "support@ccacademy.ca",
+                  "DisplayName": "Citizenship Academy",
+                  "SmtpHost": "mail.ccacademy.ca",
+                  "SmtpPort": 25,
+                  "Username": "support@ccacademy.ca",
+                  "Password": $smtp2_pwd,
+                  "EnableSsl": false
+                },
+                "Smtp3": {
+                  "IsActive": false,
+                  "Email": "support@ccacademy.ca",
+                  "DisplayName": "Citizenship Academy",
+                  "SmtpHost": "smtp.sendgrid.net",
+                  "SmtpPort": 587,
+                  "Username": "apikey",
+                  "Password": $sendgrid_smtp_pwd,
+                  "EnableSsl": false
+                }
+              },
+              "EmailProvider": {
+                "Transactional": "brevo",
+                "General": "brevo"
+              },
+              "EmailApi": {
+                "SendGrid": {
+                  "ApiKey": $sendgrid_api,
+                  "Email": "support@ccacademy.ca",
+                  "DisplayName": "Citizenship Academy"
+                },
+                "Brevo": {
+                  "BaseUrl": "https://api.brevo.com/v3/",
+                  "ApiKey": $brevo_api,
+                  "Email": "support@ccacademy.ca",
+                  "DisplayName": "Citizenship Academy"
+                }
+              },
+              "MailTemplateSettings": {
+                "AppName": "Citizenship Academy",
+                "HeaderImageUrl": "https://ccacademy.ca/images/title-cca.png",
+                "LoginUrl": ($frontend_url + "/login"),
+                "ContactEmail": "support@ccacademy.ca",
+                "StartYear": "2022",
+                "PrivacyPolicyUrl": ($frontend_url + "/privacy-policy"),
+                "CcEmail": "ccacademy.ca@gmail.com",
+                "TemplateFolder": "Templates",
+                "ThankYouTemplate": "template-thankyou.html",
+                "SignUpTemplate": "template-welcome.html",
+                "PasswordResetTemplate": "template-reset.html",
+                "EnquiryTemplate": "template-enquiry.html"
+              },
+              "Stripe": {
+                "SecretKey": $stripe_key
+              }
+            }' > appsettings.citizenshiptest.uat.json
+
+      - name: Restore & Publish
+        run: |
+          dotnet restore
+          dotnet publish -c Release -o ./publish
+
+      - name: Set ASPNETCORE_ENVIRONMENT in web.config
+        run: |
+          cat > ./publish/web.config << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <location path="." inheritInChildApplications="false">
+              <system.webServer>
+                <handlers>
+                  <add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" />
+                </handlers>
+                <aspNetCore processPath="dotnet" arguments=".\MockTestApi.dll" stdoutLogEnabled="true" stdoutLogFile=".\logs\stdout" hostingModel="OutOfProcess">
+                  <environmentVariables>
+                    <environmentVariable name="ASPNETCORE_ENVIRONMENT" value="citizenshiptest.uat" />
+                  </environmentVariables>
+                </aspNetCore>
+              </system.webServer>
+            </location>
+          </configuration>
+          EOF
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./publish/
+          server-dir: /
+          dangerous-clean-slate: false
