@@ -154,6 +154,15 @@ jobs:
           </configuration>
           EOF
 
+      - name: Take app offline
+        run: |
+          curl -T app_offline.htm "ftp://$FTP_SERVER/app_offline.htm" --user "$FTP_USER:$FTP_PASS" --ftp-pasv
+          sleep 5
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.UAT_FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.UAT_FTP_PASSWORD }}
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -163,3 +172,12 @@ jobs:
           local-dir: ./publish/
           server-dir: /
           dangerous-clean-slate: false
+
+      - name: Bring app back online
+        if: always()
+        run: |
+          curl "ftp://$FTP_SERVER/" --user "$FTP_USER:$FTP_PASS" --ftp-pasv -Q "DELE app_offline.htm"
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.UAT_FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.UAT_FTP_PASSWORD }}
