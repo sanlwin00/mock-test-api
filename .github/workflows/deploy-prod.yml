@@ -45,7 +45,7 @@ jobs:
             --arg stripe_key "$STRIPE_KEY" \
             --arg frontend_url "$FRONTEND_URL" \
             '{
-              "AllowedOrigins": [$frontend_url, "http://localhost:3001"],
+              "AllowedOrigins": [$frontend_url, "http://localhost:3001", "https://citizenshipacademy.org"],
               "MongoDB": {
                 "ConnectionString": $mongodb_cs,
                 "DatabaseName": "citizenshipdb"
@@ -122,7 +122,8 @@ jobs:
                 "ThankYouTemplate": "template-thankyou.html",
                 "SignUpTemplate": "template-welcome.html",
                 "PasswordResetTemplate": "template-reset.html",
-                "EnquiryTemplate": "template-enquiry.html"
+                "EnquiryTemplate": "template-enquiry.html",
+                "EnvironmentPrefix": ""
               },
               "Stripe": {
                 "SecretKey": $stripe_key

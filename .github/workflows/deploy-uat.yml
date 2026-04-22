@@ -122,7 +122,8 @@ jobs:
                 "ThankYouTemplate": "template-thankyou.html",
                 "SignUpTemplate": "template-welcome.html",
                 "PasswordResetTemplate": "template-reset.html",
-                "EnquiryTemplate": "template-enquiry.html"
+                "EnquiryTemplate": "template-enquiry.html",
+                "EnvironmentPrefix": "CCA-UAT"
               },
               "Stripe": {
                 "SecretKey": $stripe_key
