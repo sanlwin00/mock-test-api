@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(dotnet build:*)",
+      "Read(//d/Repos/mock-test-v2/.github/**)",
+      "Read(//d/Repos/mock-test-v2/**)"
+    ]
+  }
+}
