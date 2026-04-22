@@ -145,6 +145,9 @@ namespace MockTestApi.Services
 
         private async Task QueueEmailMessageAsync(EmailMessage message)
         {
+            if (!string.IsNullOrWhiteSpace(_templateSettings.EnvironmentPrefix))
+                message.Subject = $"[{_templateSettings.EnvironmentPrefix}] {message.Subject}";
+
             var notification = new Notification
             {
                 Id = Guid.NewGuid().ToString(),

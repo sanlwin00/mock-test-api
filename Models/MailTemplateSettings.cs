@@ -14,5 +14,6 @@
         public string SignUpTemplate { get; set; }
         public string PasswordResetTemplate { get; set; }
         public string EnquiryTemplate { get; set; }
+        public string EnvironmentPrefix { get; set; }
     }
 }
