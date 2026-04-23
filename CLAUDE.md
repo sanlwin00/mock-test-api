@@ -87,6 +87,21 @@ Multiple environment-specific appsettings files:
 6. **Email System**: Multiple email providers with template support
 7. **Background Processing**: Hangfire for async task processing
 
+### Payment / Pricing Rules
+
+**`POST /payments/create_session`** (`Services/PaymentService.cs`):
+- **Price validation**: only `14.90` and `9.90` are accepted. Any other value throws `InvalidOperationException("Invalid price: {value}")`. Comparison uses `Math.Abs(p - price) < 0.001` to handle floating-point drift.
+- **`PromoId`** (`StripeRequestDto.PromoId`): optional string sent by the frontend when the first-visit discount (`FIRST24`) is active. Logged via Serilog for audit; not used server-side to compute price (price whitelist is the enforcement mechanism).
+- **`StripeRequestDto`**: `Currency` and `Product.Price` come from the frontend; backend does not store pricing config — it validates against the hardcoded allowed set.
+
+**Allowed prices:**
+| Value | Context |
+|---|---|
+| `14.90` | Base price (citizenshiptest tenant) |
+| `9.90` | First-visit 24-hour discount (`promoId = "FIRST24"`) |
+
+If additional prices or tenants are added, update the allowed-prices array in `PaymentService.CreateSession`.
+
 ### Authentication & Security
 
 - JWT-based authentication with configurable expiration
