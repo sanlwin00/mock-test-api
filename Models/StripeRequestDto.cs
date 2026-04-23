@@ -22,6 +22,9 @@ namespace MockTestApi.Models
         [JsonPropertyName("product")]
         public Product Product { get; set; }
 
+        [JsonPropertyName("promoId")]
+        public string? PromoId { get; set; }
+
     }
 
     public class Product

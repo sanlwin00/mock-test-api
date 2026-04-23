@@ -30,6 +30,14 @@ namespace MockTestApi.Services
         {
             try
             {
+                var allowedPrices = new[] { 14.90, 9.90 };
+                if (!allowedPrices.Any(p => Math.Abs(p - stripeRequestDto.Product.Price) < 0.001))
+                {
+                    throw new InvalidOperationException($"Invalid price: {stripeRequestDto.Product.Price}");
+                }
+                Log.Information("## Payment initiated. Price={Price}, PromoId={PromoId}",
+                    stripeRequestDto.Product.Price, stripeRequestDto.PromoId);
+
                 var user = await _userService.GetUserByIdAsync(userId);
 
                 var options = new SessionCreateOptions
