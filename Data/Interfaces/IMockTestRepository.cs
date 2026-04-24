@@ -6,6 +6,7 @@ namespace MockTestApi.Data.Interfaces
     {
         Task<IEnumerable<MockTest>> GetAllAsync();
         Task<MockTest> GetByIdAsync(string id);
+        Task<IEnumerable<MockTest>> GetByUserIdAsync(string userId);
         Task CreateAsync(MockTest mockTest);
         Task<bool> UpdateAsync(MockTest mockTest);
         Task<bool> DeleteAsync(string id);

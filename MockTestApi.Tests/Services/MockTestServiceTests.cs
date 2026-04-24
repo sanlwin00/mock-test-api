@@ -339,5 +339,87 @@ namespace MockTestApi.Tests.Services
             _mockTestRepositoryMock.Verify(x => x.UpdateProgressAsync(
                 mockTestId, questionId, updateDto.UserAnswer, updateDto.SelectedOption, updateDto.ReviewLater), Times.Once);
         }
+
+        [Fact]
+        public async Task GetMockTestsByUserIdAsync_WithValidUserId_ShouldReturnOnlyThatUsersTests()
+        {
+            // Arrange
+            var userId = "user123";
+            var expectedTests = new List<MockTest>
+            {
+                new MockTest { Id = "mt1", UserId = userId, TestId = "test1" },
+                new MockTest { Id = "mt2", UserId = userId, TestId = "test2" }
+            };
+
+            _mockTestRepositoryMock.Setup(x => x.GetByUserIdAsync(userId))
+                .ReturnsAsync(expectedTests);
+
+            // Act
+            var result = await _mockTestService.GetMockTestsByUserIdAsync(userId);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Should().HaveCount(2);
+            result.Should().BeEquivalentTo(expectedTests);
+            result.Should().OnlyContain(mt => mt.UserId == userId);
+            _mockTestRepositoryMock.Verify(x => x.GetByUserIdAsync(userId), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetMockTestsByUserIdAsync_WhenUserHasNoTests_ShouldReturnEmptyCollection()
+        {
+            // Arrange
+            var userId = "user-with-no-tests";
+
+            _mockTestRepositoryMock.Setup(x => x.GetByUserIdAsync(userId))
+                .ReturnsAsync(new List<MockTest>());
+
+            // Act
+            var result = await _mockTestService.GetMockTestsByUserIdAsync(userId);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Should().BeEmpty();
+            _mockTestRepositoryMock.Verify(x => x.GetByUserIdAsync(userId), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetMockTestsByUserIdAsync_WhenRepositoryThrows_ShouldPropagateException()
+        {
+            // Arrange
+            var userId = "user123";
+
+            _mockTestRepositoryMock.Setup(x => x.GetByUserIdAsync(userId))
+                .ThrowsAsync(new Exception("Database connection failed"));
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<Exception>(
+                () => _mockTestService.GetMockTestsByUserIdAsync(userId));
+
+            exception.Message.Should().Be("Database connection failed");
+        }
+
+        [Fact]
+        public async Task GetMockTestsByUserIdAsync_ShouldNotReturnOtherUsersTests()
+        {
+            // Arrange
+            var userId = "user123";
+            var otherUsersTests = new List<MockTest>
+            {
+                new MockTest { Id = "mt1", UserId = "other-user", TestId = "test1" }
+            };
+
+            // Repository filters by userId — returns empty for this user
+            _mockTestRepositoryMock.Setup(x => x.GetByUserIdAsync(userId))
+                .ReturnsAsync(new List<MockTest>());
+
+            // Act
+            var result = await _mockTestService.GetMockTestsByUserIdAsync(userId);
+
+            // Assert
+            result.Should().BeEmpty();
+            _mockTestRepositoryMock.Verify(x => x.GetByUserIdAsync(userId), Times.Once);
+            _mockTestRepositoryMock.Verify(x => x.GetByUserIdAsync("other-user"), Times.Never);
+        }
     }
 }
