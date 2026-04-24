@@ -5,6 +5,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>e3c2b6e7-2905-4c06-a858-59455d316e3c</UserSecretsId>
+    <!-- The MockTestApi.Tests project lives inside this directory.
+         Exclude it from the main project's default item globs so its
+         .cs files (and obj/**/*.cs) are not pulled into this compilation. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);MockTestApi.Tests\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
