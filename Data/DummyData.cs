@@ -318,35 +318,5 @@ namespace MockTestApi.Data
             };
         }
 
-        public static List<MockTestHistory> GetMockTestHistories()
-        {
-            return new List<MockTestHistory>
-            {
-                new MockTestHistory
-                {
-                    Id = ObjectId.GenerateNewId().ToString(),
-                    UserId = ObjectId.GenerateNewId().ToString(),
-                    History = new List<TestHistoryItem>
-                    {
-                        new TestHistoryItem
-                        {
-                            MockTestId = ObjectId.GenerateNewId().ToString(),
-                            Title = "Geography Basics Test",
-                            Score = 1,
-                            Passed = true,
-                            TakenAt = DateTime.UtcNow
-                        },
-                        new TestHistoryItem
-                        {
-                            MockTestId = ObjectId.GenerateNewId().ToString(),
-                            Title = "History Basics Test",
-                            Score = 2,
-                            Passed = false,
-                            TakenAt = DateTime.UtcNow
-                        }
-                    }
-                }
-            };
-        }
     }
 }
