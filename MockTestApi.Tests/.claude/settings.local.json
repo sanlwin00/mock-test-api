@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/Repos/mock-test-v2/mock-test-api/Services/**)",
+      "Read(//d/Repos/mock-test-v2/mock-test-api/Utils/**)",
+      "Read(//d/Repos/mock-test-v2/**)",
+      "Bash(dotnet test:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
