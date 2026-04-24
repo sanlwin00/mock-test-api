@@ -1,6 +1,7 @@
 ﻿using Carter;
 using MockTestApi.Models;
 using MockTestApi.Services.Interfaces;
+using System.Security.Claims;
 
 namespace MockTestApi.Modules
 {
@@ -66,6 +67,37 @@ namespace MockTestApi.Modules
                 {
                     var result = await auditLogService.GetMockTestUserCountAsync();
                     return Results.Ok(result);
+                });
+            });
+
+            app.MapGet("/mock-tests/my", async (HttpContext httpContext, IMockTestService mockTestService) =>
+            {
+                return await RequestHandler.HandleRequestAsync(async () =>
+                {
+                    var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    if (string.IsNullOrEmpty(userId))
+                        return Results.Unauthorized();
+
+                    var mockTests = await mockTestService.GetMockTestsByUserIdAsync(userId);
+                    return Results.Ok(mockTests);
+                });
+            });
+
+            app.MapGet("/mock-tests/{id}", async (string id, HttpContext httpContext, IMockTestService mockTestService) =>
+            {
+                return await RequestHandler.HandleRequestAsync(async () =>
+                {
+                    var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    if (string.IsNullOrEmpty(userId))
+                        return Results.Unauthorized();
+
+                    var mockTest = await mockTestService.GetMockTestByIdAsync(id);
+                    if (mockTest == null)
+                        return Results.NotFound();
+                    if (mockTest.UserId != userId)
+                        return Results.Forbid();
+
+                    return Results.Ok(mockTest);
                 });
             });
         }

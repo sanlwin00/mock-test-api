@@ -9,6 +9,7 @@ namespace MockTestApi.Models
         public string Category { get; set; }
         public List<QuestionAccess> Questions { get; set; }
         public string Access { get; set; }
+        public int? DurationMinutes { get; set; }
         public string CreatedBy { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? ModifiedAt { get; set; }
