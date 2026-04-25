@@ -79,25 +79,38 @@ Multiple environment-specific appsettings files:
 
 ### Key Features
 
-1. **Progress Saving**: Recent implementation allows saving test progress mid-session
+1. **Progress Saving**: Saves test progress mid-session
 2. **Audit Trail**: Comprehensive logging across all modules for security and compliance
 3. **Rate Limiting**: IP-based rate limiting for API protection
 4. **Multi-tenancy**: Support for different test environments (citizenship, raven)
 5. **Payment Integration**: Full Stripe payment processing with webhook support
 6. **Email System**: Multiple email providers with template support
 7. **Background Processing**: Hangfire for async task processing
+8. **Scoped Question Fetch**: `GET /questions/{locale}?testId=xxx` returns only the questions belonging to a specific test, ordered by sequence. Falls back to all questions when `testId` is omitted (`Modules/TestAndQuestionModule.cs`). Implemented in `QuestionService.GetQuestionsByTestIdAsync` via `QuestionRepository.GetByIdsAsync`.
+
+### CI / CD Pipeline
+
+Both `deploy-prod.yml` and `deploy-uat.yml` use a **3-job pipeline** with explicit `needs:` dependencies:
+
+| Stage | Job | What it does |
+|---|---|---|
+| 1 | `build` | `dotnet restore` + `dotnet build -c Release` |
+| 2 | `test` | `dotnet test MockTestApi.Tests/...` — gates deploy |
+| 3 | `deploy` | Generate appsettings from secrets → publish → FTP |
+
+The `environment:` protection (production / uat) is on the `deploy` job only.
 
 ### Payment / Pricing Rules
 
 **`POST /payments/create_session`** (`Services/PaymentService.cs`):
-- **Price validation**: only `14.90` and `9.90` are accepted. Any other value throws `InvalidOperationException("Invalid price: {value}")`. Comparison uses `Math.Abs(p - price) < 0.001` to handle floating-point drift.
+- **Price validation**: only `12.90` and `9.90` are accepted. Any other value throws `InvalidOperationException("Invalid price: {value}")`. Comparison uses `Math.Abs(p - price) < 0.001` to handle floating-point drift.
 - **`PromoId`** (`StripeRequestDto.PromoId`): optional string sent by the frontend when the first-visit discount (`FIRST24`) is active. Logged via Serilog for audit; not used server-side to compute price (price whitelist is the enforcement mechanism).
 - **`StripeRequestDto`**: `Currency` and `Product.Price` come from the frontend; backend does not store pricing config — it validates against the hardcoded allowed set.
 
 **Allowed prices:**
 | Value | Context |
 |---|---|
-| `14.90` | Base price (citizenshiptest tenant) |
+| `12.90` | Base price (citizenshiptest tenant) |
 | `9.90` | First-visit 24-hour discount (`promoId = "FIRST24"`) |
 
 If additional prices or tenants are added, update the allowed-prices array in `PaymentService.CreateSession`.
@@ -110,10 +123,3 @@ If additional prices or tenants are added, update the allowed-prices array in `P
 - Audit logging for all user actions
 - Rate limiting to prevent abuse
 
-### Current Development Branch
-
-Working on `Test-Progress-Saving` branch with modifications to:
-- MockTest progress saving functionality
-- Enhanced audit trail coverage
-- Chat service improvements
-- Updated endpoints for progress management
