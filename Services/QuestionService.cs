@@ -7,26 +7,46 @@ namespace MockTestApi.Services
     public class QuestionService : IQuestionService
     {
         private readonly IQuestionRepository _questionRepository;
+        private readonly ITestRepository _testRepository;
         private readonly string DEFAULT_LOCALE = "en";
-        public QuestionService(IQuestionRepository questionRepository)
+
+        public QuestionService(IQuestionRepository questionRepository, ITestRepository testRepository)
         {
             _questionRepository = questionRepository;
+            _testRepository = testRepository;
         }
 
         public async Task<IEnumerable<QuestionDto>> GetAllQuestionsAsync(string? locale = null)
-        {            
-            IEnumerable<Question> questions = await _questionRepository.GetAllAsync();
+        {
+            var questions = await _questionRepository.GetAllAsync();
+            return MapToDto(questions, locale);
+        }
 
-            // Do not load additional locae if it's the default locale
-            if (string.IsNullOrEmpty(locale) || locale.ToLower().Equals(DEFAULT_LOCALE))
+        public async Task<IEnumerable<QuestionDto>> GetQuestionsByTestIdAsync(string testId, string? locale = null)
+        {
+            var test = await _testRepository.GetByIdAsync(testId);
+            if (test == null) return Enumerable.Empty<QuestionDto>();
+
+            var questionIds = test.Questions.Select(q => q.QuestionId);
+            var questions = await _questionRepository.GetByIdsAsync(questionIds);
+
+            // Preserve the test's question order
+            var orderedIds = test.Questions.OrderBy(q => q.Sequence).Select(q => q.QuestionId).ToList();
+            questions = questions.OrderBy(q => orderedIds.IndexOf(q.Id));
+
+            return MapToDto(questions, locale);
+        }
+
+        private IEnumerable<QuestionDto> MapToDto(IEnumerable<Question> questions, string? locale)
+        {
+            if (string.IsNullOrEmpty(locale) || locale.Equals(DEFAULT_LOCALE, StringComparison.OrdinalIgnoreCase))
                 locale = null;
 
-            // Map questions to QuestionDto and handle localization
             return questions.Select(q => new QuestionDto
             {
                 Id = q.Id,
-                Text = q.Text[DEFAULT_LOCALE], 
-                TextLocal = GetLocalizedText(q.Text, locale), // Localized text or empty if not found
+                Text = q.Text[DEFAULT_LOCALE],
+                TextLocal = GetLocalizedText(q.Text, locale),
                 Type = q.Type,
                 Options = q.Options.Select(o => new OptionDto
                 {
