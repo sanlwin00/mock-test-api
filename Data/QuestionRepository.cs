@@ -16,5 +16,10 @@ public class QuestionRepository : IQuestionRepository
     {
         return await _collection.Find(_ => true).ToListAsync();
     }
-    
+
+    public async Task<IEnumerable<Question>> GetByIdsAsync(IEnumerable<string> ids)
+    {
+        var idList = ids.ToList();
+        return await _collection.Find(q => idList.Contains(q.Id)).ToListAsync();
+    }
 }
