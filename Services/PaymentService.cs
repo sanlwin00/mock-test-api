@@ -30,7 +30,7 @@ namespace MockTestApi.Services
         {
             try
             {
-                var allowedPrices = new[] { 14.90, 9.90 };
+                var allowedPrices = new[] { 12.90, 9.90 };
                 if (!allowedPrices.Any(p => Math.Abs(p - stripeRequestDto.Product.Price) < 0.001))
                 {
                     throw new InvalidOperationException($"Invalid price: {stripeRequestDto.Product.Price}");
