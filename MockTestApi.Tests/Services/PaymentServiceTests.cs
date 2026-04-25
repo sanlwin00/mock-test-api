@@ -178,7 +178,7 @@ namespace MockTestApi.Tests.Services
                 Product = new MockTestApi.Models.Product
                 {
                     Name = "Premium Subscription - 30 days",
-                    Price = 14.90,
+                    Price = 12.90,
                     Qty = 1
                 },
                 Currency = "cad",
@@ -189,7 +189,7 @@ namespace MockTestApi.Tests.Services
 
             // Assert
             stripeRequest.Product.Name.Should().Be("Premium Subscription - 30 days");
-            stripeRequest.Product.Price.Should().Be(14.90);
+            stripeRequest.Product.Price.Should().Be(12.90);
             stripeRequest.Product.Qty.Should().Be(1);
             stripeRequest.Currency.Should().Be("cad");
             stripeRequest.ApprovedUrl.Should().Be("https://example.com/success");
@@ -222,14 +222,14 @@ namespace MockTestApi.Tests.Services
         [Fact]
         public void CreateSession_PriceValidation_OnlyAllowedPricesShouldPass()
         {
-            // Allowed set: 14.90 (base) and 9.90 (first-visit discount)
-            var allowedPrices = new[] { 14.90, 9.90 };
+            // Allowed set: 12.90 (base) and 9.90 (first-visit discount)
+            var allowedPrices = new[] { 12.90, 9.90 };
 
             // Validate logic mirrors PaymentService.CreateSession
             bool IsAllowed(double price) =>
                 allowedPrices.Any(p => Math.Abs(p - price) < 0.001);
 
-            IsAllowed(14.90).Should().BeTrue("base price must be accepted");
+            IsAllowed(12.90).Should().BeTrue("base price must be accepted");
             IsAllowed(9.90).Should().BeTrue("first-visit discounted price must be accepted");
             IsAllowed(0.01).Should().BeFalse("arbitrary low price must be rejected");
             IsAllowed(99.99).Should().BeFalse("arbitrary high price must be rejected");
@@ -238,7 +238,7 @@ namespace MockTestApi.Tests.Services
         [Fact]
         public async Task CreateSession_WithInvalidPrice_ShouldThrowInvalidOperationException()
         {
-            // Arrange — price not in allowed set {14.90, 9.90}
+            // Arrange — price not in allowed set {12.90, 9.90}
             var userId = "64f1234567890abcdef12345";
             var stripeRequest = new StripeRequestDto
             {

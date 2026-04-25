@@ -31,6 +31,10 @@ This test project contains comprehensive unit tests for the MockTestApi backend 
    - Payment validation and authorization
    - Data structure validation
 
+5. **QuestionService** (`Services/QuestionServiceTests.cs`)
+   - `GetAllQuestionsAsync` — DTO mapping, locale handling (en/fr/null), fallback to English
+   - `GetQuestionsByTestIdAsync` — test not found, DTO mapping, sequence ordering, ID scoping, locale handling
+
 ### Test Categories
 
 #### Happy Flow Tests
@@ -116,9 +120,9 @@ dotnet build && dotnet test
 
 ## Test Results Summary
 
-- **Total Test Classes**: 8
-- **Total Test Methods**: 50+
-- **Coverage Areas**: Services layer, authentication, payments, data validation
+- **Total Test Classes**: 9
+- **Total Test Methods**: 99
+- **Coverage Areas**: Services layer, authentication, payments, question/test data, data validation
 - **Test Types**: Unit tests with mocked dependencies
 - **Assertion Style**: Fluent assertions for readability
 
