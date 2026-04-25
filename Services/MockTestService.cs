@@ -50,11 +50,14 @@ namespace MockTestApi.Services
         }
 
 
-        public Task<IEnumerable<MockTest>> GetAllMockTestsAsync() => 
+        public Task<IEnumerable<MockTest>> GetAllMockTestsAsync() =>
             _mockTestRepository.GetAllAsync();
 
-        public Task<MockTest> GetMockTestByIdAsync(string id) => 
+        public Task<MockTest> GetMockTestByIdAsync(string id) =>
             _mockTestRepository.GetByIdAsync(id);
+
+        public Task<IEnumerable<MockTest>> GetMockTestsByUserIdAsync(string userId) =>
+            _mockTestRepository.GetByUserIdAsync(userId);
     }
 
 }

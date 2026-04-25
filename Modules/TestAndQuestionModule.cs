@@ -17,10 +17,13 @@ namespace MockTestApi.Modules
                 });
             });
 
-            app.MapGet("/questions/{locale}", async (IQuestionService questionService, string locale) =>
+            app.MapGet("/questions/{locale}", async (IQuestionService questionService, string locale, string? testId) =>
             {
                 return await RequestHandler.HandleRequestAsync(async () =>
                 {
+                    if (!string.IsNullOrEmpty(testId))
+                        return Results.Ok(await questionService.GetQuestionsByTestIdAsync(testId, locale));
+
                     return Results.Ok(await questionService.GetAllQuestionsAsync(locale));
                 });
             });

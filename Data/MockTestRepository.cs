@@ -24,6 +24,11 @@ namespace MockTestApi.Data
             return await _collection.Find(mt => mt.Id == id).FirstOrDefaultAsync();
         }
 
+        public async Task<IEnumerable<MockTest>> GetByUserIdAsync(string userId)
+        {
+            return await _collection.Find(mt => mt.UserId == userId).ToListAsync();
+        }
+
         public async Task CreateAsync(MockTest mockTest)
         {
             if (mockTest == null)
