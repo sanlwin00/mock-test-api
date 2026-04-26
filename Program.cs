@@ -188,6 +188,7 @@ void RegisterRepositories(IServiceCollection services)
     services.AddScoped<IReferenceMaterialRepository, ReferenceMaterialRepository>();
     services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
     services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+    services.AddScoped<IFlashCardRepository, FlashCardRepository>();
 }
 
 void RegisterServices(IServiceCollection services)
@@ -202,6 +203,7 @@ void RegisterServices(IServiceCollection services)
     services.AddScoped<IMockTestService, MockTestService>();
     services.AddScoped<IChatService, ChatService>();
     services.AddScoped<IReferenceMaterialService, ReferenceMaterialService>();
+    services.AddScoped<IFlashCardService, FlashCardService>();
 }
 
 void RegisterNotificationServices(IServiceCollection services)
